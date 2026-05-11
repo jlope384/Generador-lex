@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import List, Optional
 
 from .action_parser import ActionInfo, parse_action
-from .automata import EOF_SENTINEL, combine_rule_nfas, nfa_to_dfa
+from .automata import EOF_SENTINEL, combine_rule_nfas, minimize_dfa, nfa_to_dfa, regexes_to_direct_dfa
 from .regex_ast import Charset, Concat, EOFMarker, Epsilon, Literal, OptionalNode, Plus, RegexNode, Star, Tagged, UnionNode
 from .regex_parser import ASCII_UNIVERSE, RegexParser
 from .yalex_parser import YALexParser, YALexSpec
@@ -19,6 +19,8 @@ class GeneratedArtifacts:
     python_path: Path
     graph_path: Path
     dfa_state_count: int
+    dfa_state_count_before_minimization: int
+    method: str
 
 
 class YALexGenerator:
@@ -29,7 +31,16 @@ class YALexGenerator:
         text = Path(path).read_text(encoding='utf-8')
         return YALexParser().parse(text)
 
-    def generate(self, yal_path: str | os.PathLike[str], output_py: str | os.PathLike[str], graph_path: Optional[str | os.PathLike[str]] = None) -> GeneratedArtifacts:
+    def generate(
+        self,
+        yal_path: str | os.PathLike[str],
+        output_py: str | os.PathLike[str],
+        graph_path: Optional[str | os.PathLike[str]] = None,
+        method: str = "direct",
+    ) -> GeneratedArtifacts:
+        if method not in {"direct", "thompson"}:
+            raise ValueError("method must be either 'direct' or 'thompson'")
+
         spec = self.load_spec(yal_path)
         parser = RegexParser(spec.definitions, universe=self.universe)
 
@@ -60,8 +71,9 @@ class YALexGenerator:
         for nxt in visual_roots[1:]:
             visual_root = UnionNode(visual_root, nxt)
 
-        nfa = combine_rule_nfas(rule_asts)
-        dfa = nfa_to_dfa(nfa, [*self.universe, EOF_SENTINEL])
+        alphabet = [*self.universe, EOF_SENTINEL]
+        raw_dfa = self._build_dfa(rule_asts, alphabet, method)
+        dfa = minimize_dfa(raw_dfa, alphabet)
 
         graph = Path(graph_path) if graph_path else Path(output_py).with_suffix('.ast.png')
         graph.parent.mkdir(parents=True, exist_ok=True)
@@ -71,8 +83,21 @@ class YALexGenerator:
 
         out_path = Path(output_py)
         out_path.parent.mkdir(parents=True, exist_ok=True)
-        out_path.write_text(self._render_python(spec, dfa, action_infos, eof_action, regex_texts), encoding='utf-8')
-        return GeneratedArtifacts(spec=spec, python_path=out_path, graph_path=graph, dfa_state_count=len(dfa.transitions))
+        out_path.write_text(self._render_python(spec, dfa, action_infos, eof_action, regex_texts, method), encoding='utf-8')
+        return GeneratedArtifacts(
+            spec=spec,
+            python_path=out_path,
+            graph_path=graph,
+            dfa_state_count=len(dfa.transitions),
+            dfa_state_count_before_minimization=len(raw_dfa.transitions),
+            method=method,
+        )
+
+    def _build_dfa(self, rule_asts: List[RegexNode], alphabet: List[str], method: str):
+        if method == "direct":
+            return regexes_to_direct_dfa(rule_asts, alphabet)
+        nfa = combine_rule_nfas(rule_asts)
+        return nfa_to_dfa(nfa, alphabet)
 
     def _is_nullable(self, node: RegexNode) -> bool:
         if isinstance(node, Epsilon):
@@ -93,7 +118,7 @@ class YALexGenerator:
             return self._is_nullable(node.child)
         raise TypeError(f'Unsupported regex node for nullability check: {type(node)!r}')
 
-    def _render_python(self, spec: YALexSpec, dfa, action_infos: List[ActionInfo], eof_action: Optional[ActionInfo], regex_texts: List[str]) -> str:
+    def _render_python(self, spec: YALexSpec, dfa, action_infos: List[ActionInfo], eof_action: Optional[ActionInfo], regex_texts: List[str], method: str) -> str:
         actions_payload = [ai.__dict__ for ai in action_infos]
         eof_payload = eof_action.__dict__ if eof_action else None
         token_names = sorted({ai.token_name for ai in action_infos if ai.token_name})
@@ -123,6 +148,7 @@ class YALexGenerator:
             [
                 f"DFA_TRANSITIONS = {repr(dfa.transitions)}",
                 f"DFA_ACCEPTS = {repr(dfa.accepts)}",
+                f"DFA_METHOD = {method!r}",
                 f"ACTIONS = {repr(actions_payload)}",
                 f"EOF_ACTION = {repr(eof_payload)}",
                 f"EOF_SENTINEL = {EOF_SENTINEL!r}",

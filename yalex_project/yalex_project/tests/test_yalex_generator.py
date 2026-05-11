@@ -7,6 +7,7 @@ import textwrap
 import unittest
 from pathlib import Path
 
+from yalexgen.automata import DFA, minimize_dfa
 from yalexgen.generator import YALexGenerator
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -363,7 +364,7 @@ class YALexGeneratorIntegrationTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.tempdir.cleanup()
 
-    def _generate(self, *, spec_text: str | None = None, spec_path: Path | None = None, stem: str = "lexer"):
+    def _generate(self, *, spec_text: str | None = None, spec_path: Path | None = None, stem: str = "lexer", method: str = "direct"):
         if spec_text is None and spec_path is None:
             raise ValueError("spec_text or spec_path is required")
         if spec_text is not None:
@@ -374,11 +375,13 @@ class YALexGeneratorIntegrationTests(unittest.TestCase):
             source = spec_path
         output = self.temp_path / f"{stem}.py"
         graph = self.temp_path / f"{stem}.png"
-        artifacts = self.generator.generate(source, output, graph)
+        artifacts = self.generator.generate(source, output, graph, method=method)
         self.assertTrue(output.exists(), output)
         self.assertTrue(graph.exists(), graph)
         self.assertGreater(graph.stat().st_size, 0)
         self.assertGreater(artifacts.dfa_state_count, 0)
+        self.assertEqual(artifacts.method, method)
+        self.assertLessEqual(artifacts.dfa_state_count, artifacts.dfa_state_count_before_minimization)
         return output
 
     def _run_lexer(self, lexer_path: Path, *, input_text: str | None = None, input_path: Path | None = None, with_lexeme: bool = False):
@@ -407,74 +410,82 @@ class YALexGeneratorIntegrationTests(unittest.TestCase):
             self.assertIn(fragment, result.stdout)
 
     def test_pico_success_examples_from_spec(self) -> None:
-        lexer_path = self._generate(spec_path=ROOT / "examples" / "pico" / "pico.yal", stem="pico")
-        for filename, expected in PICO_SUCCESS_CASES.items():
-            with self.subTest(filename=filename):
-                self._assert_success_case(lexer_path, ROOT / "examples" / "pico" / filename, expected)
+        for method in ("direct", "thompson"):
+            lexer_path = self._generate(spec_path=ROOT / "examples" / "pico" / "pico.yal", stem=f"pico_{method}", method=method)
+            for filename, expected in PICO_SUCCESS_CASES.items():
+                with self.subTest(method=method, filename=filename):
+                    self._assert_success_case(lexer_path, ROOT / "examples" / "pico" / filename, expected)
 
     def test_pico_error_examples_from_spec(self) -> None:
-        lexer_path = self._generate(spec_path=ROOT / "examples" / "pico" / "pico.yal", stem="pico_errors")
-        for filename, fragments in PICO_ERROR_CASES.items():
-            with self.subTest(filename=filename):
-                self._assert_error_case(lexer_path, ROOT / "examples" / "pico" / filename, fragments)
+        for method in ("direct", "thompson"):
+            lexer_path = self._generate(spec_path=ROOT / "examples" / "pico" / "pico.yal", stem=f"pico_errors_{method}", method=method)
+            for filename, fragments in PICO_ERROR_CASES.items():
+                with self.subTest(method=method, filename=filename):
+                    self._assert_error_case(lexer_path, ROOT / "examples" / "pico" / filename, fragments)
 
     def test_arnoldc_success_examples_from_spec(self) -> None:
-        lexer_path = self._generate(spec_path=ROOT / "examples" / "arnoldc" / "arnoldc.yal", stem="arnoldc")
-        for filename, expected in ARNOLDC_SUCCESS_CASES.items():
-            with self.subTest(filename=filename):
-                self._assert_success_case(lexer_path, ROOT / "examples" / "arnoldc" / filename, expected)
+        for method in ("direct", "thompson"):
+            lexer_path = self._generate(spec_path=ROOT / "examples" / "arnoldc" / "arnoldc.yal", stem=f"arnoldc_{method}", method=method)
+            for filename, expected in ARNOLDC_SUCCESS_CASES.items():
+                with self.subTest(method=method, filename=filename):
+                    self._assert_success_case(lexer_path, ROOT / "examples" / "arnoldc" / filename, expected)
 
     def test_arnoldc_error_examples_from_spec(self) -> None:
-        lexer_path = self._generate(spec_path=ROOT / "examples" / "arnoldc" / "arnoldc.yal", stem="arnoldc_errors")
-        for filename, fragments in ARNOLDC_ERROR_CASES.items():
-            with self.subTest(filename=filename):
-                self._assert_error_case(lexer_path, ROOT / "examples" / "arnoldc" / filename, fragments)
+        for method in ("direct", "thompson"):
+            lexer_path = self._generate(spec_path=ROOT / "examples" / "arnoldc" / "arnoldc.yal", stem=f"arnoldc_errors_{method}", method=method)
+            for filename, fragments in ARNOLDC_ERROR_CASES.items():
+                with self.subTest(method=method, filename=filename):
+                    self._assert_error_case(lexer_path, ROOT / "examples" / "arnoldc" / filename, fragments)
 
     def test_respects_longest_match_and_rule_priority(self) -> None:
-        lexer_path = self._generate(
-            stem="priority",
-            spec_text=r"""
-            rule gettoken =
-                [' ' '\t' '\n'] { return lexbuf }
-              | "if"            { return IF }
-              | ['a'-'z']+      { return IDENT(lxm) }
-              | "=="            { return EQEQ }
-              | "="             { return EQ }
-              | eof             { raise('End of input') }
-            """,
-        )
+        for method in ("direct", "thompson"):
+            lexer_path = self._generate(
+                stem=f"priority_{method}",
+                method=method,
+                spec_text=r"""
+                rule gettoken =
+                    [' ' '\t' '\n'] { return lexbuf }
+                  | "if"            { return IF }
+                  | ['a'-'z']+      { return IDENT(lxm) }
+                  | "=="            { return EQEQ }
+                  | "="             { return EQ }
+                  | eof             { raise('End of input') }
+                """,
+            )
 
-        result = self._run_lexer(lexer_path, input_text="if iff == =")
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout.splitlines(), ["IF", "IDENT", "EQEQ", "EQ"])
+            result = self._run_lexer(lexer_path, input_text="if iff == =")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.splitlines(), ["IF", "IDENT", "EQEQ", "EQ"])
 
     def test_supports_regex_operators_and_eof_inside_regex(self) -> None:
-        lexer_path = self._generate(
-            stem="operators",
-            spec_text=r"""
-            let lower    = ['a'-'z']
-            let vowel    = ["aeiou"]
-            let cons     = lower # vowel
-            let ident    = cons+ '!'?
-            let str_char = [^ '"' '\n']
-            let str_lit  = '"' str_char+ '"'
-            let escaped  = '\\' _
-            let line_cmt = '/' '/' [^ '\n']* ('\n' | eof)
+        for method in ("direct", "thompson"):
+            lexer_path = self._generate(
+                stem=f"operators_{method}",
+                method=method,
+                spec_text=r"""
+                let lower    = ['a'-'z']
+                let vowel    = ["aeiou"]
+                let cons     = lower # vowel
+                let ident    = cons+ '!'?
+                let str_char = [^ '"' '\n']
+                let str_lit  = '"' str_char+ '"'
+                let escaped  = '\\' _
+                let line_cmt = '/' '/' [^ '\n']* ('\n' | eof)
 
-            rule gettoken =
-                [' ' '\t' '\n']  { return lexbuf }
-              | line_cmt         { return lexbuf }
-              | "if"             { return IF }
-              | ident            { return IDENT(lxm) }
-              | str_lit          { return STRING(lxm) }
-              | escaped          { return ESC(lxm) }
-              | eof              { raise('End of input') }
-            """,
-        )
+                rule gettoken =
+                    [' ' '\t' '\n']  { return lexbuf }
+                  | line_cmt         { return lexbuf }
+                  | "if"             { return IF }
+                  | ident            { return IDENT(lxm) }
+                  | str_lit          { return STRING(lxm) }
+                  | escaped          { return ESC(lxm) }
+                  | eof              { raise('End of input') }
+                """,
+            )
 
-        result = self._run_lexer(lexer_path, input_text='if bcd! "xyz" \\? // trailing comment')
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout.splitlines(), ["IF", "IDENT", "STRING", "ESC"])
+            result = self._run_lexer(lexer_path, input_text='if bcd! "xyz" \\? // trailing comment')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(result.stdout.splitlines(), ["IF", "IDENT", "STRING", "ESC"])
 
     def test_rejects_nullable_rules(self) -> None:
         spec = """
@@ -485,6 +496,98 @@ class YALexGeneratorIntegrationTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "empty string"):
             self._generate(spec_text=spec, stem="nullable")
+
+    def test_generator_defaults_to_direct_method(self) -> None:
+        source = self.temp_path / "default_method.yal"
+        source.write_text(
+            textwrap.dedent(
+                r"""
+                rule gettoken =
+                    'a' { return A }
+                  | eof { raise('End of input') }
+                """
+            ).lstrip(),
+            encoding="utf-8",
+        )
+        artifacts = self.generator.generate(source, self.temp_path / "default_method.py", self.temp_path / "default_method.png")
+        self.assertEqual(artifacts.method, "direct")
+
+    def test_minimization_merges_equivalent_same_rule_acceptors(self) -> None:
+        dfa = DFA(
+            start=0,
+            transitions={
+                0: {"a": 1, "b": 2},
+                1: {"a": 1},
+                2: {"a": 1},
+            },
+            accepts={1: 0, 2: 0},
+        )
+
+        minimized = minimize_dfa(dfa, ["a", "b"])
+
+        self.assertEqual(minimized.transitions[0]["a"], minimized.transitions[0]["b"])
+        self.assertEqual(len(minimized.transitions), 2)
+
+    def test_minimization_keeps_different_accept_rules_separate(self) -> None:
+        dfa = DFA(
+            start=0,
+            transitions={
+                0: {"a": 1, "b": 2},
+                1: {},
+                2: {},
+            },
+            accepts={1: 0, 2: 1},
+        )
+
+        minimized = minimize_dfa(dfa, ["a", "b"])
+
+        self.assertNotEqual(minimized.transitions[0]["a"], minimized.transitions[0]["b"])
+        self.assertEqual(set(minimized.accepts.values()), {0, 1})
+
+    def test_minimization_keeps_missing_transitions_as_implicit_rejects(self) -> None:
+        dfa = DFA(
+            start=0,
+            transitions={
+                0: {"a": 1},
+                1: {},
+            },
+            accepts={1: 0},
+        )
+
+        minimized = minimize_dfa(dfa, ["a", "b"])
+
+        self.assertNotIn("b", minimized.transitions[0])
+        self.assertNotIn("a", minimized.transitions[minimized.transitions[0]["a"]])
+
+    def test_direct_and_thompson_methods_are_equivalent(self) -> None:
+        spec = r"""
+        let lower    = ['a'-'z']
+        let vowel    = ["aeiou"]
+        let cons     = lower # vowel
+        let ident    = cons+ '!'?
+        let str_char = [^ '"' '\n']
+        let str_lit  = '"' str_char+ '"'
+        let escaped  = '\\' _
+        let line_cmt = '/' '/' [^ '\n']* ('\n' | eof)
+
+        rule gettoken =
+            [' ' '\t' '\n']  { return lexbuf }
+          | line_cmt         { return lexbuf }
+          | "if"             { return IF }
+          | ident            { return IDENT(lxm) }
+          | str_lit          { return STRING(lxm) }
+          | escaped          { return ESC(lxm) }
+          | eof              { raise('End of input') }
+        """
+        direct = self._generate(stem="equiv_direct", method="direct", spec_text=spec)
+        thompson = self._generate(stem="equiv_thompson", method="thompson", spec_text=spec)
+
+        for input_text in ['if bcd! "xyz" \\? // trailing comment', "if iff", "@"]:
+            with self.subTest(input_text=input_text):
+                direct_result = self._run_lexer(direct, input_text=input_text)
+                thompson_result = self._run_lexer(thompson, input_text=input_text)
+                self.assertEqual(direct_result.returncode, thompson_result.returncode)
+                self.assertEqual(direct_result.stdout, thompson_result.stdout)
 
 
 if __name__ == "__main__":

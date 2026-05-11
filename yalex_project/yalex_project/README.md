@@ -6,7 +6,9 @@ Proyecto base para generar analizadores léxicos desde archivos `.yal`.
 
 - Parser de archivos YALex
 - Parser de expresiones regulares del subconjunto pedido
-- Construcción `regexp -> NFA -> DFA`
+- Construcción directa `regexp -> DFA`
+- Construcción alternativa `regexp -> NFA -> DFA` por Thompson
+- Minimización del DFA generado
 - Generación de un lexer en Python
 - Graficación del árbol de expresión en PNG
 - Ejemplos para `PICO` y `ArnoldC`
@@ -16,7 +18,7 @@ Proyecto base para generar analizadores léxicos desde archivos `.yal`.
 - `run_generator.py`: CLI principal
 - `yalexgen/yalex_parser.py`: parser del archivo `.yal`
 - `yalexgen/regex_parser.py`: parser de regex YALex
-- `yalexgen/automata.py`: Thompson + subset construction
+- `yalexgen/automata.py`: DFA directo, Thompson + subset construction y minimización
 - `yalexgen/generator.py`: emite el lexer Python
 - `yalexgen/visualize.py`: genera la imagen del árbol
 - `examples/`: ejemplos `.yal` y archivos de entrada
@@ -35,10 +37,23 @@ python3 run_generator.py examples/pico/pico.yal -o build/pico_lexer.py --graph b
 python3 build/pico_lexer.py examples/pico/hello.pico --with-lexeme
 ```
 
+El método principal es la construcción directa del DFA. El comando anterior usa
+`--method direct` por defecto. Para indicarlo explícitamente:
+
+```bash
+python3 run_generator.py examples/pico/pico.yal -o build/pico_lexer.py --graph build/pico_ast.png --method direct
+```
+
+Para generar usando Thompson como método alternativo:
+
+```bash
+python3 run_generator.py examples/pico/pico.yal -o build/pico_lexer.py --graph build/pico_ast.png --method thompson
+```
+
 Para ArnoldC:
 
 ```bash
-python3 -c "from yalexgen.generator import YALexGenerator; g=YALexGenerator(); g.generate('examples/arnoldc/arnoldc.yal','build/arnold_lexer.py','build/arnold_ast.png')"
+python3 -c "from yalexgen.generator import YALexGenerator; g=YALexGenerator(); g.generate('examples/arnoldc/arnoldc.yal','build/arnold_lexer.py','build/arnold_ast.png', method='direct')"
 python3 build/arnold_lexer.py examples/arnoldc/hello.arnoldc --with-lexeme
 ```
 
@@ -88,4 +103,4 @@ Acciones Python arbitrarias también se copian, pero el mejor soporte funcional 
 
 ## Nota
 
-El archivo generado es suficientemente general para specs tipo PICO y ArnoldC, incluyendo keywords largas, prioridad por orden de reglas y regla de lexema más largo.
+El archivo generado es suficientemente general para specs tipo PICO y ArnoldC, incluyendo keywords largas, prioridad por orden de reglas y regla de lexema más largo. Ambos métodos construyen un DFA minimizado antes de emitir el lexer Python.
