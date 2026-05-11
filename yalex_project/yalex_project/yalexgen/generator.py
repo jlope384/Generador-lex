@@ -41,7 +41,7 @@ class YALexGenerator:
         method: str = "direct",
     ) -> GeneratedArtifacts:
         if method not in {"direct", "thompson"}:
-            raise ValueError("method must be either 'direct' or 'thompson'")
+            raise ValueError(f"Unknown construction method {method!r}; expected 'direct' or 'thompson'")
 
         spec = self.load_spec(yal_path)
         parser = RegexParser(spec.definitions, universe=self.universe)
@@ -58,6 +58,7 @@ class YALexGenerator:
                 eof_action = parse_action(entry.action_text)
                 continue
             ast = parser.parse(entry.regex_text)
+            # Nullable regexes would cause the lexer to loop forever on empty matches
             if self._is_nullable(ast):
                 raise ValueError(f"Rule regex can match the empty string, which would loop forever: {entry.regex_text!r}")
             rule_asts.append(ast)

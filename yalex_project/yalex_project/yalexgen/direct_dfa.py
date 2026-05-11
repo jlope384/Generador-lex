@@ -30,9 +30,10 @@ class DirectDFACompiler:
         if not rule_asts:
             raise ValueError("At least one regex rule is required for direct DFA construction")
 
+        # Augment each rule with an accept marker before computing firstpos/lastpos
         root = self._augment_rules(rule_asts)
         info = self._analyze(root)
-        alpha = list(alphabet)
+        alphabet_list = list(alphabet)
 
         start_set = info.firstpos
         state_map: Dict[FrozenSet[int], int] = {start_set: 0}
@@ -48,7 +49,7 @@ class DirectDFACompiler:
             current = unmarked.pop(0)
             current_id = state_map[current]
             transitions[current_id] = {}
-            for ch in alpha:
+            for ch in alphabet_list:
                 nxt: Set[int] = set()
                 for pos in current:
                     if ch in self.position_symbols.get(pos, frozenset()):

@@ -14,11 +14,12 @@ class DFA:
 
 
 def minimize_dfa(dfa: DFA, alphabet: Iterable[str]) -> DFA:
-    alpha = list(alphabet)
+    alphabet_list = list(alphabet)
     states = _all_dfa_states(dfa)
     if not states:
         return DFA(start=0, transitions={0: {}}, accepts={})
 
+    # Use a synthetic dead state so the transition function is total during partitioning
     dead_state = max(states) + 1
     complete_states = set(states)
     complete_states.add(dead_state)
@@ -45,7 +46,7 @@ def minimize_dfa(dfa: DFA, alphabet: Iterable[str]) -> DFA:
             for state in group:
                 signature = (
                     dfa.accepts.get(state),
-                    tuple(class_of[_complete_transition(dfa, state, ch, dead_state)] for ch in alpha),
+                    tuple(class_of[_complete_transition(dfa, state, ch, dead_state)] for ch in alphabet_list),
                 )
                 buckets.setdefault(signature, set()).add(state)
             refined.extend(buckets.values())
@@ -83,7 +84,7 @@ def minimize_dfa(dfa: DFA, alphabet: Iterable[str]) -> DFA:
         representative = real_states[0]
         if representative in dfa.accepts:
             accepts[new_state] = dfa.accepts[representative]
-        for ch in alpha:
+        for ch in alphabet_list:
             target = _complete_transition(dfa, representative, ch, dead_state)
             target_class = class_of[target]
             if target_class == reject_class:

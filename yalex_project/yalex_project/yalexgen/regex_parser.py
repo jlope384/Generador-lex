@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 from .regex_ast import Charset, Concat, EOF_NODE, EPSILON, Epsilon, Literal, OptionalNode, Plus, RegexNode, Star, UnionNode
 
 ASCII_UNIVERSE = frozenset(chr(i) for i in range(256))
+SPECIAL_CHARS = frozenset('()|*+?#')
 
 
 class RegexParseError(Exception):
@@ -32,7 +33,7 @@ class RegexTokenizer:
             if c.isspace():
                 self.i += 1
                 continue
-            if c in '()|*+?#':
+            if c in SPECIAL_CHARS:
                 tokens.append(Token(c, c, self.i))
                 self.i += 1
                 continue
@@ -66,20 +67,20 @@ class RegexTokenizer:
     def _read_quoted_body(self, quote: str) -> str:
         assert self.text[self.i] == quote
         self.i += 1
-        out = []
+        buf = []
         while self.i < self.n:
             c = self.text[self.i]
             if c == '\\':
                 self.i += 1
                 if self.i >= self.n:
                     raise RegexParseError('Incomplete escape sequence')
-                out.append(_decode_escape(self.text[self.i]))
+                buf.append(_decode_escape(self.text[self.i]))
                 self.i += 1
                 continue
             if c == quote:
                 self.i += 1
-                return ''.join(out)
-            out.append(c)
+                return ''.join(buf)
+            buf.append(c)
             self.i += 1
         raise RegexParseError(f'Unterminated {quote} literal')
 

@@ -108,6 +108,7 @@ def combine_rule_nfas(rule_asts: List[RegexNode]) -> NFA:
 
 
 def epsilon_closure(nfa: NFA, state_ids: Iterable[int]) -> FrozenSet[int]:
+    # Iterative DFS to avoid recursion limits on deeply nested expressions
     stack = list(state_ids)
     closure = set(stack)
     while stack:
@@ -120,16 +121,16 @@ def epsilon_closure(nfa: NFA, state_ids: Iterable[int]) -> FrozenSet[int]:
 
 
 def move(nfa: NFA, states: Iterable[int], ch: str) -> FrozenSet[int]:
-    out: Set[int] = set()
+    reachable: Set[int] = set()
     for sid in states:
         for charset, tgt in nfa.states[sid].trans:
             if ch in charset:
-                out.add(tgt)
-    return frozenset(out)
+                reachable.add(tgt)
+    return frozenset(reachable)
 
 
 def nfa_to_dfa(nfa: NFA, alphabet: Iterable[str]) -> DFA:
-    alpha = list(alphabet)
+    alphabet_list = list(alphabet)
     start_set = epsilon_closure(nfa, [nfa.start])
     state_map: Dict[FrozenSet[int], int] = {start_set: 0}
     transitions: Dict[int, Dict[str, int]] = {}
@@ -148,7 +149,7 @@ def nfa_to_dfa(nfa: NFA, alphabet: Iterable[str]) -> DFA:
         current = unmarked.pop(0)
         current_id = state_map[current]
         transitions[current_id] = {}
-        for ch in alpha:
+        for ch in alphabet_list:
             nxt = epsilon_closure(nfa, move(nfa, current, ch))
             if not nxt:
                 continue
