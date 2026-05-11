@@ -18,7 +18,10 @@ Proyecto base para generar analizadores léxicos desde archivos `.yal`.
 - `run_generator.py`: CLI principal
 - `yalexgen/yalex_parser.py`: parser del archivo `.yal`
 - `yalexgen/regex_parser.py`: parser de regex YALex
-- `yalexgen/automata.py`: DFA directo, Thompson + subset construction y minimización
+- `yalexgen/dfa.py`: estructura DFA, símbolo EOF y minimización
+- `yalexgen/direct_dfa.py`: construcción directa `regexp -> DFA`
+- `yalexgen/thompson.py`: construcción `regexp -> NFA -> DFA`
+- `yalexgen/automata.py`: fachada compatible que reexporta los módulos de autómatas
 - `yalexgen/generator.py`: emite el lexer Python
 - `yalexgen/visualize.py`: genera la imagen del árbol
 - `examples/`: ejemplos `.yal` y archivos de entrada

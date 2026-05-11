@@ -7,9 +7,11 @@ from pathlib import Path
 from typing import List, Optional
 
 from .action_parser import ActionInfo, parse_action
-from .automata import EOF_SENTINEL, combine_rule_nfas, minimize_dfa, nfa_to_dfa, regexes_to_direct_dfa
+from .dfa import EOF_SENTINEL, minimize_dfa
+from .direct_dfa import regexes_to_direct_dfa
 from .regex_ast import Charset, Concat, EOFMarker, Epsilon, Literal, OptionalNode, Plus, RegexNode, Star, Tagged, UnionNode
 from .regex_parser import ASCII_UNIVERSE, RegexParser
+from .thompson import combine_rule_nfas, nfa_to_dfa
 from .yalex_parser import YALexParser, YALexSpec
 
 

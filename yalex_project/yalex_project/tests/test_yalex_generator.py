@@ -7,7 +7,7 @@ import textwrap
 import unittest
 from pathlib import Path
 
-from yalexgen.automata import DFA, minimize_dfa
+from yalexgen.dfa import DFA, minimize_dfa
 from yalexgen.generator import YALexGenerator
 
 ROOT = Path(__file__).resolve().parents[1]
