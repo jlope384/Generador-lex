@@ -1,0 +1,4 @@
+Source      : C:\Users\jlope\AppData\Local\Temp\expr.yapar
+Tokens      : 7  ->  ID, NUMBER, PLUS, MINUS, TIMES, LPAREN, RPAREN
+Ignore      : 1  ->  WS
+Productions : 8 non-empty line(s)
