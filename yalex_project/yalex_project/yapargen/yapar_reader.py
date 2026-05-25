@@ -67,12 +67,14 @@ def read_string(src: str, *, source: str = "<string>") -> YAParSpec:
     seen_ignore: set[str] = set()
     production_lines: list[str] = []
     in_productions = False
+    found_separator = False
 
     for lineno, raw_line in enumerate(src.splitlines(), start=1):
         line = raw_line.rstrip()
 
         if _SECTION_SEP.match(line):
             in_productions = True
+            found_separator = True
             continue
 
         if in_productions:
@@ -97,9 +99,15 @@ def read_string(src: str, *, source: str = "<string>") -> YAParSpec:
                 _accumulate(name, ignore, seen_ignore, lineno, source, kind="ignore")
             continue
 
-    if not tokens and not production_lines:
+    if not tokens:
         raise YAParReadError(
             f"{source}: no %token directive found — is this a valid .yapar file?"
+        )
+
+    if not found_separator:
+        raise YAParReadError(
+            f"{source}: missing '%%' separator between token declarations "
+            f"and production rules"
         )
 
     return YAParSpec(
