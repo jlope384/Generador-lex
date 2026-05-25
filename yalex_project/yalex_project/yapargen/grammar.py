@@ -11,6 +11,10 @@ class Production:
     def __len__(self) -> int:
         return len(self.body)
 
+    def __repr__(self) -> str:
+        body_str = ' '.join(self.body) if self.body else 'ε'
+        return f"{self.head} -> {body_str}"
+
 
 @dataclass
 class Grammar:
@@ -20,10 +24,10 @@ class Grammar:
     start: str = ""
 
     def add_production(self, head: str, body: tuple[str, ...]) -> Production:
-        p = Production(head, body)
-        self.productions.append(p)
+        prod = Production(head, body)
+        self.productions.append(prod)
         self.non_terminals.add(head)
-        return p
+        return prod
 
     def augment(self) -> Grammar:
         raise NotImplementedError

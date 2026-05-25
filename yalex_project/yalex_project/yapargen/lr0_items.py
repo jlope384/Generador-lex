@@ -11,11 +11,13 @@ class LR0Item:
     dot: int
 
     def next_symbol(self) -> str | None:
+        """Return the symbol immediately after the dot, or None if the item is complete."""
         if self.dot < len(self.production.body):
             return self.production.body[self.dot]
         return None
 
     def advance(self) -> LR0Item:
+        """Return a new item with the dot shifted one position to the right."""
         return LR0Item(self.production, self.dot + 1)
 
     def is_complete(self) -> bool:

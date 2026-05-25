@@ -5,7 +5,7 @@ from typing import FrozenSet, Optional
 
 
 class RegexNode:
-    pass
+    """Base class for all nodes in the regex AST."""
 
 
 @dataclass(frozen=True)
@@ -26,7 +26,7 @@ class Literal(RegexNode):
 @dataclass(frozen=True)
 class Charset(RegexNode):
     chars: FrozenSet[str]
-    label: Optional[str] = None
+    label: Optional[str] = None  # human-readable label used only for visualization
 
 
 @dataclass(frozen=True)

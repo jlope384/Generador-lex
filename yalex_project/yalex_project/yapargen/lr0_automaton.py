@@ -12,6 +12,10 @@ class LR0Automaton:
     transitions: dict[tuple[int, str], int] = field(default_factory=dict)
     start_state: int = 0
 
+    @property
+    def num_states(self) -> int:
+        return len(self.states)
+
 
 def build_lr0_automaton(grammar: Grammar) -> LR0Automaton:
     raise NotImplementedError
