@@ -11,6 +11,8 @@ _TOKEN_LINE = re.compile(r"^\s*%token\s+(.+)$")
 _IGNORE_LINE = re.compile(r"^\s*%ignore\s+(.+)$")
 # Section separator (YACC-style %%  or  //-style ---PRODUCTIONS---)
 _SECTION_SEP = re.compile(r"^\s*%%\s*$")
+# /* ... */ block comments (may span multiple lines)
+_BLOCK_COMMENT = re.compile(r"/\*.*?\*/", re.DOTALL)
 
 
 class YAParReadError(ValueError):
@@ -55,6 +57,8 @@ def read_string(src: str, *, source: str = "<string>") -> YAParSpec:
     Raises:
         YAParReadError: If no ``%token`` directive is found.
     """
+    src = _BLOCK_COMMENT.sub("", src)
+
     tokens: list[str] = []
     ignore: list[str] = []
     production_lines: list[str] = []
