@@ -7,8 +7,10 @@ from .token_contract import YAParSpec
 
 # Matches:  %token  ID  NUMBER  PLUS  ...
 _TOKEN_LINE = re.compile(r"^\s*%token\s+(.+)$")
-# Matches:  %ignore  WS  COMMENT  ...
+# Matches:  %ignore  WS  COMMENT  ... (with percent sign)
 _IGNORE_LINE = re.compile(r"^\s*%ignore\s+(.+)$")
+# Matches:  IGNORE  WS  COMMENT  ... (bare keyword, no percent sign)
+_BARE_IGNORE_LINE = re.compile(r"^\s*IGNORE\s+(.+)$")
 # Section separator (YACC-style %%  or  //-style ---PRODUCTIONS---)
 _SECTION_SEP = re.compile(r"^\s*%%\s*$")
 # /* ... */ block comments (may span multiple lines)
@@ -60,7 +62,9 @@ def read_string(src: str, *, source: str = "<string>") -> YAParSpec:
     src = _BLOCK_COMMENT.sub("", src)
 
     tokens: list[str] = []
+    seen_tokens: set[str] = set()
     ignore: list[str] = []
+    seen_ignore: set[str] = set()
     production_lines: list[str] = []
     in_productions = False
 
@@ -83,12 +87,14 @@ def read_string(src: str, *, source: str = "<string>") -> YAParSpec:
 
         m = _TOKEN_LINE.match(stripped)
         if m:
-            tokens.extend(_split_names(m.group(1), lineno, source))
+            for name in _split_token_names(m.group(1), lineno, source):
+                _accumulate(name, tokens, seen_tokens, lineno, source, kind="token")
             continue
 
-        m = _IGNORE_LINE.match(stripped)
+        m = _IGNORE_LINE.match(stripped) or _BARE_IGNORE_LINE.match(stripped)
         if m:
-            ignore.extend(_split_names(m.group(1), lineno, source))
+            for name in _split_token_names(m.group(1), lineno, source):
+                _accumulate(name, ignore, seen_ignore, lineno, source, kind="ignore")
             continue
 
     if not tokens and not production_lines:
@@ -103,12 +109,38 @@ def read_string(src: str, *, source: str = "<string>") -> YAParSpec:
     )
 
 
-def _split_names(text: str, lineno: int, source: str) -> list[str]:
-    """Split a whitespace-separated list of identifier names."""
+def _split_token_names(text: str, lineno: int, source: str) -> list[str]:
+    """Split and validate a whitespace-separated list of token names.
+
+    Tokens must be valid identifiers AND fully uppercase (e.g. ``ID``,
+    ``NUMBER``, ``PLUS_OP``).  Mixed-case names raise :exc:`YAParReadError`.
+    """
     names = text.split()
-    bad = [n for n in names if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", n)]
-    if bad:
+    bad_fmt = [n for n in names if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", n)]
+    if bad_fmt:
         raise YAParReadError(
-            f"{source}:{lineno}: invalid token name(s): {', '.join(bad)}"
+            f"{source}:{lineno}: invalid token name(s): {', '.join(bad_fmt)}"
+        )
+    bad_case = [n for n in names if n != n.upper()]
+    if bad_case:
+        raise YAParReadError(
+            f"{source}:{lineno}: token name(s) must be uppercase: {', '.join(bad_case)}"
         )
     return names
+
+
+def _accumulate(
+    name: str,
+    lst: list[str],
+    seen: set[str],
+    lineno: int,
+    source: str,
+    kind: str,
+) -> None:
+    """Append *name* to *lst*, raising on duplicates."""
+    if name in seen:
+        raise YAParReadError(
+            f"{source}:{lineno}: duplicate {kind} '{name}'"
+        )
+    seen.add(name)
+    lst.append(name)
