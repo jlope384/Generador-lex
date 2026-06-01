@@ -1,0 +1,31 @@
+/* ------------------------------------------------------------------ */
+/* Gramatica SLR canonica de la actividad "Construccion del Automata   */
+/* LR(0)".  Equivalencias con la notacion matematica del enunciado:     */
+/*     s  = S      p = P      q = Q                                     */
+/*     AND = ∧     OR = ∨     LBRACKET = [   RBRACKET = ]   SENTENCE = sentence */
+/* ------------------------------------------------------------------ */
+
+/* INICIA Seccion de TOKENS */
+%token AND OR
+%token LBRACKET RBRACKET
+%token SENTENCE
+/* FINALIZA Seccion de TOKENS */
+
+%%
+
+/* INICIA Seccion de PRODUCCIONES */
+s:
+    s AND p
+  | p
+;
+
+p:
+    p OR q
+  | q
+;
+
+q:
+    LBRACKET s RBRACKET
+  | SENTENCE
+;
+/* FINALIZA Seccion de PRODUCCIONES */

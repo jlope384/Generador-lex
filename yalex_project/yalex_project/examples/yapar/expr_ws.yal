@@ -1,0 +1,14 @@
+(* expr_ws.yal — como expr.yal pero EMITE WS en vez de descartarlo,            *)
+(* para demostrar IGNORE en YAPar.                                              *)
+{
+# Lexer que emite WS (para demostrar IGNORE)
+}
+let ws = [' ' '\t' '\n' '\r']
+rule gettoken =
+    ws+                 { return WS }
+  | "sentence"          { return SENTENCE }
+  | '&'                 { return AND }
+  | '|'                 { return OR }
+  | '['                 { return LBRACKET }
+  | ']'                 { return RBRACKET }
+  | eof                 { raise('End of input') }

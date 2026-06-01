@@ -3,3 +3,11 @@
 pycache
 __pycache__
 temp
+
+# Copias de referencia por etapa (scaffolding para los commits; ver GUIA-DE-COMMITS.md)
+entregas-por-etapa/
+
+# Artefactos regenerables de YAPar (se recrean con run_yapar.py / build_report.py)
+yalex_project/yalex_project/build/yapar/
+yalex_project/yalex_project/docs/assets/
+GUIA-DEL-PROYECTO.md

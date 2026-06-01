@@ -1,0 +1,19 @@
+(* expr.yal — Lexer YALex para la gramatica SLR canonica.            *)
+(* Emite exactamente los tokens declarados en expr_slr.yalp:          *)
+(*   '&' -> AND (∧)   '|' -> OR (∨)   '[' -> LBRACKET   ']' -> RBRACKET *)
+(*   "sentence" -> SENTENCE.  Los espacios se descartan (return lexbuf).*)
+
+{
+# Lexer para la gramatica logica de ejemplo (YAPar)
+}
+
+let ws = [' ' '\t' '\n' '\r']
+
+rule gettoken =
+    ws+                 { return lexbuf }
+  | "sentence"          { return SENTENCE }
+  | '&'                 { return AND }
+  | '|'                 { return OR }
+  | '['                 { return LBRACKET }
+  | ']'                 { return RBRACKET }
+  | eof                 { raise('End of input') }

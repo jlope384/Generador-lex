@@ -1,0 +1,16 @@
+(* arith.yal — lexer para expr_eps.yalp: id, +, *, (, ) *)
+{
+# Lexer aritmetico para la gramatica con epsilon
+}
+let letter = ['a'-'z' 'A'-'Z']
+let digit  = ['0'-'9']
+let ws     = [' ' '\t' '\n' '\r']
+let id     = letter (letter | digit)*
+rule gettoken =
+    ws+        { return lexbuf }
+  | id         { return ID }
+  | '+'        { return PLUS }
+  | '*'        { return TIMES }
+  | '('        { return LPAREN }
+  | ')'        { return RPAREN }
+  | eof        { raise('End of input') }
