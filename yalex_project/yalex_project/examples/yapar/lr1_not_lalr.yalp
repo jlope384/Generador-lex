@@ -1,0 +1,29 @@
+/* ------------------------------------------------------------------ */
+/* Gramatica LR(1) pero NO LALR(1) (Aho, Sethi, Ullman, ejemplo 4.49):  */
+/*     S -> a A d | b B d | a B e | b A e        A -> c     B -> c       */
+/* Al fusionar nucleos LR(0), los estados {A->c·} y {B->c·} (uno por la  */
+/* via 'a' y otro por la via 'b') se combinan y sus lookaheads {d,e} se  */
+/* unen, creando un conflicto reduce/reduce que LR(1) canonico no tiene. */
+/* Es el limite conocido de LALR frente a LR(1).                         */
+/*     m = A     n = B                                                   */
+/*     TA=a  TB=b  TC=c  TD=d  TE=e                                       */
+/* ------------------------------------------------------------------ */
+
+%token TA TB TC TD TE
+
+%%
+
+s:
+    TA m TD
+  | TB n TD
+  | TA n TE
+  | TB m TE
+;
+
+m:
+    TC
+;
+
+n:
+    TC
+;

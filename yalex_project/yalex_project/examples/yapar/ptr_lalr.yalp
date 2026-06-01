@@ -1,0 +1,26 @@
+/* ------------------------------------------------------------------ */
+/* Gramatica "de punteros" (Aho, Sethi, Ullman, ejemplo 4.48):          */
+/*     S -> L = R | R        L -> * R | id        R -> L                 */
+/* Es el ejemplo clasico de una gramatica LALR(1) que NO es SLR(1):     */
+/* SLR genera un conflicto shift/reduce sobre '=' (porque = pertenece a  */
+/* FOLLOW(r)), mientras que LALR lo resuelve con lookaheads precisos.    */
+/*     l = L     r = R     ASSIGN = '='   STAR = '*'   ID = id           */
+/* ------------------------------------------------------------------ */
+
+%token ASSIGN STAR ID
+
+%%
+
+s:
+    l ASSIGN r
+  | r
+;
+
+l:
+    STAR r
+  | ID
+;
+
+r:
+    l
+;

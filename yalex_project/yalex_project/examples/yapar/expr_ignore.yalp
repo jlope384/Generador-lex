@@ -1,0 +1,9 @@
+/* Igual que expr_slr.yalp pero declarando WS como token IGNORADO, para        */
+/* demostrar la directiva IGNORE: el lexer EMITE WS y el parser lo descarta.   */
+%token AND OR LBRACKET RBRACKET SENTENCE
+%token WS
+IGNORE WS
+%%
+s:  s AND p | p ;
+p:  p OR q  | q ;
+q:  LBRACKET s RBRACKET | SENTENCE ;

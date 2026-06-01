@@ -1,0 +1,17 @@
+(* ptr.yal — Lexer para la gramatica de punteros ptr_lalr.yalp.        *)
+(*   id  -> ID        '=' -> ASSIGN       '*' -> STAR                    *)
+
+{
+# Lexer para la gramatica de punteros (LALR vs SLR)
+}
+
+let letter = ['a'-'z' 'A'-'Z']
+let ws     = [' ' '\t' '\n' '\r']
+let id     = letter (letter | ['0'-'9'])*
+
+rule gettoken =
+    ws+        { return lexbuf }
+  | id         { return ID }
+  | '='        { return ASSIGN }
+  | '*'        { return STAR }
+  | eof        { raise('End of input') }

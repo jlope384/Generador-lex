@@ -1,0 +1,10 @@
+/* Gramatica de expresiones aritmeticas con producciones-epsilon (nullable).  */
+/* Es el ejemplo clasico (Dragon book) E->T E', E'->+ T E' | e, etc.          */
+/*   e=E  ep=E'  t=T  tp=T'  f=F ; ID=id PLUS=+ TIMES=* LPAREN=( RPAREN=)      */
+%token PLUS TIMES LPAREN RPAREN ID
+%%
+e:  t ep ;
+ep: PLUS t ep | ;
+t:  f tp ;
+tp: TIMES f tp | ;
+f:  LPAREN e RPAREN | ID ;
