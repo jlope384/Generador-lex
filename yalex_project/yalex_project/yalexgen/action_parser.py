@@ -13,7 +13,6 @@ class ActionInfo:
     argument: Optional[str] = None
 
 
-# Patterns are compiled once at import time to avoid repeated re.compile overhead
 RETURN_LEXBUF = re.compile(r'^return\s+lexbuf\s*;?\s*$')
 RETURN_NAME = re.compile(r'^return\s+([A-Za-z_][A-Za-z0-9_]*)\s*;?\s*$')
 RETURN_CALL = re.compile(r'^return\s+([A-Za-z_][A-Za-z0-9_]*)\((.*)\)\s*;?\s*$')
@@ -21,7 +20,6 @@ RAISE_CALL = re.compile(r'^raise\s*\((.*)\)\s*;?\s*$')
 
 
 def parse_action(action_text: str) -> ActionInfo:
-    # Collapse internal whitespace so patterns match regardless of formatting
     action = ' '.join(action_text.strip().split())
     if not action:
         return ActionInfo(kind='raw', raw='')

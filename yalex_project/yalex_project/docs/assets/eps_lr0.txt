@@ -1,0 +1,97 @@
+Autómata LR(0) — gramática con epsilon
+======================================
+
+I0  (inicial):
+    e -> . t ep
+    e' -> . e
+    f -> . ID
+    f -> . LPAREN e RPAREN
+    t -> . f tp
+      --ID--> I5
+      --LPAREN--> I4
+      --e--> I1
+      --f--> I3
+      --t--> I2
+
+I1:
+    e' -> e .
+
+I2:
+    e -> t . ep
+    ep -> .
+    ep -> . PLUS t ep
+      --PLUS--> I7
+      --ep--> I6
+
+I3:
+    t -> f . tp
+    tp -> .
+    tp -> . TIMES f tp
+      --TIMES--> I9
+      --tp--> I8
+
+I4:
+    e -> . t ep
+    f -> . ID
+    f -> . LPAREN e RPAREN
+    f -> LPAREN . e RPAREN
+    t -> . f tp
+      --ID--> I5
+      --LPAREN--> I4
+      --e--> I10
+      --f--> I3
+      --t--> I2
+
+I5:
+    f -> ID .
+
+I6:
+    e -> t ep .
+
+I7:
+    ep -> PLUS . t ep
+    f -> . ID
+    f -> . LPAREN e RPAREN
+    t -> . f tp
+      --ID--> I5
+      --LPAREN--> I4
+      --f--> I3
+      --t--> I11
+
+I8:
+    t -> f tp .
+
+I9:
+    f -> . ID
+    f -> . LPAREN e RPAREN
+    tp -> TIMES . f tp
+      --ID--> I5
+      --LPAREN--> I4
+      --f--> I12
+
+I10:
+    f -> LPAREN e . RPAREN
+      --RPAREN--> I13
+
+I11:
+    ep -> .
+    ep -> . PLUS t ep
+    ep -> PLUS t . ep
+      --PLUS--> I7
+      --ep--> I14
+
+I12:
+    tp -> .
+    tp -> . TIMES f tp
+    tp -> TIMES f . tp
+      --TIMES--> I9
+      --tp--> I15
+
+I13:
+    f -> LPAREN e RPAREN .
+
+I14:
+    ep -> PLUS t ep .
+
+I15:
+    tp -> TIMES f tp .

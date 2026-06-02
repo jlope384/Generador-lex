@@ -1,0 +1,223 @@
+
+========================================================================
+Gramática: ptr_lalr.yalp
+========================================================================
+Tokens declarados : ASSIGN, STAR, ID
+Tokens ignorados  : (ninguno)
+No-terminales     : l, r, s
+Símbolo inicial   : s
+Producciones:
+  R1: s -> l ASSIGN r
+  R2: s -> r
+  R3: l -> STAR r
+  R4: l -> ID
+  R5: r -> l
+
+========================================================================
+YALex: ptr.yal
+========================================================================
+Lexer generado: build/yapar/ptr_lexer.py  (5 estados DFA tras minimización)
+YALex emite   : ASSIGN, ID, STAR
+YAPar espera  : ASSIGN, STAR, ID
+Contrato OK: los conjuntos de tokens son consistentes.
+
+========================================================================
+Gramática aumentada
+========================================================================
+  (0) s' -> s  (aceptación)
+  (1) s -> l ASSIGN r
+  (2) s -> r
+  (3) l -> STAR r
+  (4) l -> ID
+  (5) r -> l
+
+========================================================================
+FIRST / FOLLOW
+========================================================================
+FIRST:
+  s: { ID, STAR }
+  l: { ID, STAR }
+  r: { ID, STAR }
+FOLLOW:
+  s: { $ }
+  l: { $, ASSIGN }
+  r: { $, ASSIGN }
+
+========================================================================
+Autómata LR(0) — 10 estados
+========================================================================
+Autómata LR(0) — ptr_lalr
+=========================
+
+I0  (inicial):
+    l -> . ID
+    l -> . STAR r
+    r -> . l
+    s -> . l ASSIGN r
+    s -> . r
+    s' -> . s
+      --ID--> I5
+      --STAR--> I4
+      --l--> I2
+      --r--> I3
+      --s--> I1
+
+I1:
+    s' -> s .
+
+I2:
+    r -> l .
+    s -> l . ASSIGN r
+      --ASSIGN--> I6
+
+I3:
+    s -> r .
+
+I4:
+    l -> . ID
+    l -> . STAR r
+    l -> STAR . r
+    r -> . l
+      --ID--> I5
+      --STAR--> I4
+      --l--> I7
+      --r--> I8
+
+I5:
+    l -> ID .
+
+I6:
+    l -> . ID
+    l -> . STAR r
+    r -> . l
+    s -> l ASSIGN . r
+      --ID--> I5
+      --STAR--> I4
+      --l--> I7
+      --r--> I9
+
+I7:
+    r -> l .
+
+I8:
+    l -> STAR r .
+
+I9:
+    s -> l ASSIGN r .
+
+Imágenes/representaciones del autómata LR(0):
+  dot: build/yapar/ptr_lalr_lr0.dot
+  text: build/yapar/ptr_lalr_lr0.txt
+  png: build/yapar/ptr_lalr_lr0.png
+Autómata LALR(1):
+  dot: build/yapar/ptr_lalr_lalr.dot
+  text: build/yapar/ptr_lalr_lalr.txt
+  png: build/yapar/ptr_lalr_lalr.png
+
+========================================================================
+Tabla SLR(1)
+========================================================================
+Tabla de parseo SLR(1)
+======================
+Estado | ASSIGN | STAR | ID |  $  | s | l | r
+-------+--------+------+----+-----+---+---+--
+  0    |        |  s4  | s5 |     | 1 | 2 | 3
+  1    |        |      |    | acc |   |   |  
+  2    |   s6   |      |    |  r5 |   |   |  
+  3    |        |      |    |  r2 |   |   |  
+  4    |        |  s4  | s5 |     |   | 7 | 8
+  5    |   r4   |      |    |  r4 |   |   |  
+  6    |        |  s4  | s5 |     |   | 7 | 9
+  7    |   r5   |      |    |  r5 |   |   |  
+  8    |   r3   |      |    |  r3 |   |   |  
+  9    |        |      |    |  r1 |   |   |  
+
+Reglas (r#):
+  accept (S' -> S): s' -> s
+  r1: s -> l ASSIGN r
+  r2: s -> r
+  r3: l -> STAR r
+  r4: l -> ID
+  r5: r -> l
+
+Se detectaron 1 conflicto(s):
+  [shift/reduce] estado I2, símbolo 'ASSIGN': reduce r5 (r -> l) vs shift -> I6
+Parser autónomo generado: build/yapar/ptr_lalr_slr_parser.py
+
+========================================================================
+Análisis sintáctico (SLR) de ptr_deref.txt
+========================================================================
+Tokens: STAR ID ASSIGN ID $
+
+Stack                |  Input                |  Acción
+---------------------+-----------------------+--------------------------
+0                    |  STAR ID ASSIGN ID $  |  shift -> I4
+0 STAR 4             |  ID ASSIGN ID $       |  shift -> I5
+0 STAR 4 ID 5        |  ASSIGN ID $          |  reduce r4: l -> ID
+0 STAR 4 l 7         |  ASSIGN ID $          |  reduce r5: r -> l
+0 STAR 4 r 8         |  ASSIGN ID $          |  reduce r3: l -> STAR r
+0 l 2                |  ASSIGN ID $          |  shift -> I6
+0 l 2 ASSIGN 6       |  ID $                 |  shift -> I5
+0 l 2 ASSIGN 6 ID 5  |  $                    |  reduce r4: l -> ID
+0 l 2 ASSIGN 6 l 7   |  $                    |  reduce r5: r -> l
+0 l 2 ASSIGN 6 r 9   |  $                    |  reduce r1: s -> l ASSIGN r
+0 s 1                |  $                    |  accept
+
+CADENA ACEPTADA ✓
+Árbol de parseo: build/yapar/ptr_lalr_slr_tree.png
+
+========================================================================
+Tabla LALR(1)
+========================================================================
+Tabla de parseo LALR(1)
+=======================
+Estado | ASSIGN | STAR | ID |  $  | s | l | r
+-------+--------+------+----+-----+---+---+--
+  0    |        |  s4  | s5 |     | 1 | 2 | 3
+  1    |        |      |    | acc |   |   |  
+  2    |   s6   |      |    |  r5 |   |   |  
+  3    |        |      |    |  r2 |   |   |  
+  4    |        |  s4  | s5 |     |   | 7 | 8
+  5    |   r4   |      |    |  r4 |   |   |  
+  6    |        |  s4  | s5 |     |   | 7 | 9
+  7    |   r5   |      |    |  r5 |   |   |  
+  8    |   r3   |      |    |  r3 |   |   |  
+  9    |        |      |    |  r1 |   |   |  
+
+Reglas (r#):
+  accept (S' -> S): s' -> s
+  r1: s -> l ASSIGN r
+  r2: s -> r
+  r3: l -> STAR r
+  r4: l -> ID
+  r5: r -> l
+
+Sin conflictos: la gramática es compatible con el método elegido.
+Parser autónomo generado: build/yapar/ptr_lalr_lalr_parser.py
+
+========================================================================
+Análisis sintáctico (LALR) de ptr_deref.txt
+========================================================================
+Tokens: STAR ID ASSIGN ID $
+
+Stack                |  Input                |  Acción
+---------------------+-----------------------+--------------------------
+0                    |  STAR ID ASSIGN ID $  |  shift -> I4
+0 STAR 4             |  ID ASSIGN ID $       |  shift -> I5
+0 STAR 4 ID 5        |  ASSIGN ID $          |  reduce r4: l -> ID
+0 STAR 4 l 7         |  ASSIGN ID $          |  reduce r5: r -> l
+0 STAR 4 r 8         |  ASSIGN ID $          |  reduce r3: l -> STAR r
+0 l 2                |  ASSIGN ID $          |  shift -> I6
+0 l 2 ASSIGN 6       |  ID $                 |  shift -> I5
+0 l 2 ASSIGN 6 ID 5  |  $                    |  reduce r4: l -> ID
+0 l 2 ASSIGN 6 l 7   |  $                    |  reduce r5: r -> l
+0 l 2 ASSIGN 6 r 9   |  $                    |  reduce r1: s -> l ASSIGN r
+0 s 1                |  $                    |  accept
+
+CADENA ACEPTADA ✓
+Árbol de parseo: build/yapar/ptr_lalr_lalr_tree.png
+
+========================================================================
+Listo
+========================================================================
+Artefactos en: build/yapar/

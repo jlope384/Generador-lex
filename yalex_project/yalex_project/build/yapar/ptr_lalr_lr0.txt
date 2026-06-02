@@ -1,0 +1,58 @@
+Autómata LR(0) — ptr_lalr
+=========================
+
+I0  (inicial):
+    l -> . ID
+    l -> . STAR r
+    r -> . l
+    s -> . l ASSIGN r
+    s -> . r
+    s' -> . s
+      --ID--> I5
+      --STAR--> I4
+      --l--> I2
+      --r--> I3
+      --s--> I1
+
+I1:
+    s' -> s .
+
+I2:
+    r -> l .
+    s -> l . ASSIGN r
+      --ASSIGN--> I6
+
+I3:
+    s -> r .
+
+I4:
+    l -> . ID
+    l -> . STAR r
+    l -> STAR . r
+    r -> . l
+      --ID--> I5
+      --STAR--> I4
+      --l--> I7
+      --r--> I8
+
+I5:
+    l -> ID .
+
+I6:
+    l -> . ID
+    l -> . STAR r
+    r -> . l
+    s -> l ASSIGN . r
+      --ID--> I5
+      --STAR--> I4
+      --l--> I7
+      --r--> I9
+
+I7:
+    r -> l .
+
+I8:
+    l -> STAR r .
+
+I9:
+    s -> l ASSIGN r .

@@ -1,0 +1,82 @@
+Autómata LALR(1) — expr_slr
+===========================
+
+I0  (inicial):
+    p -> . p OR q , $/AND/OR
+    p -> . q , $/AND/OR
+    q -> . LBRACKET s RBRACKET , $/AND/OR
+    q -> . SENTENCE , $/AND/OR
+    s -> . p , $/AND
+    s -> . s AND p , $/AND
+    s' -> . s , $
+      --LBRACKET--> I4
+      --SENTENCE--> I5
+      --p--> I2
+      --q--> I3
+      --s--> I1
+
+I1:
+    s -> s . AND p , $/AND
+    s' -> s . , $
+      --AND--> I6
+
+I2:
+    p -> p . OR q , $/AND/OR/RBRACKET
+    s -> p . , $/AND/RBRACKET
+      --OR--> I7
+
+I3:
+    p -> q . , $/AND/OR/RBRACKET
+
+I4:
+    p -> . p OR q , AND/OR/RBRACKET
+    p -> . q , AND/OR/RBRACKET
+    q -> . LBRACKET s RBRACKET , AND/OR/RBRACKET
+    q -> . SENTENCE , AND/OR/RBRACKET
+    q -> LBRACKET . s RBRACKET , $/AND/OR/RBRACKET
+    s -> . p , AND/RBRACKET
+    s -> . s AND p , AND/RBRACKET
+      --LBRACKET--> I4
+      --SENTENCE--> I5
+      --p--> I2
+      --q--> I3
+      --s--> I8
+
+I5:
+    q -> SENTENCE . , $/AND/OR/RBRACKET
+
+I6:
+    p -> . p OR q , $/AND/OR/RBRACKET
+    p -> . q , $/AND/OR/RBRACKET
+    q -> . LBRACKET s RBRACKET , $/AND/OR/RBRACKET
+    q -> . SENTENCE , $/AND/OR/RBRACKET
+    s -> s AND . p , $/AND/RBRACKET
+      --LBRACKET--> I4
+      --SENTENCE--> I5
+      --p--> I9
+      --q--> I3
+
+I7:
+    p -> p OR . q , $/AND/OR/RBRACKET
+    q -> . LBRACKET s RBRACKET , $/AND/OR/RBRACKET
+    q -> . SENTENCE , $/AND/OR/RBRACKET
+      --LBRACKET--> I4
+      --SENTENCE--> I5
+      --q--> I10
+
+I8:
+    q -> LBRACKET s . RBRACKET , $/AND/OR/RBRACKET
+    s -> s . AND p , AND/RBRACKET
+      --AND--> I6
+      --RBRACKET--> I11
+
+I9:
+    p -> p . OR q , $/AND/OR/RBRACKET
+    s -> s AND p . , $/AND/RBRACKET
+      --OR--> I7
+
+I10:
+    p -> p OR q . , $/AND/OR/RBRACKET
+
+I11:
+    q -> LBRACKET s RBRACKET . , $/AND/OR/RBRACKET

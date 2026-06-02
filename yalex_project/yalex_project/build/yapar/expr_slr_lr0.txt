@@ -1,0 +1,82 @@
+Autómata LR(0) — expr_slr
+=========================
+
+I0  (inicial):
+    p -> . p OR q
+    p -> . q
+    q -> . LBRACKET s RBRACKET
+    q -> . SENTENCE
+    s -> . p
+    s -> . s AND p
+    s' -> . s
+      --LBRACKET--> I4
+      --SENTENCE--> I5
+      --p--> I2
+      --q--> I3
+      --s--> I1
+
+I1:
+    s -> s . AND p
+    s' -> s .
+      --AND--> I6
+
+I2:
+    p -> p . OR q
+    s -> p .
+      --OR--> I7
+
+I3:
+    p -> q .
+
+I4:
+    p -> . p OR q
+    p -> . q
+    q -> . LBRACKET s RBRACKET
+    q -> . SENTENCE
+    q -> LBRACKET . s RBRACKET
+    s -> . p
+    s -> . s AND p
+      --LBRACKET--> I4
+      --SENTENCE--> I5
+      --p--> I2
+      --q--> I3
+      --s--> I8
+
+I5:
+    q -> SENTENCE .
+
+I6:
+    p -> . p OR q
+    p -> . q
+    q -> . LBRACKET s RBRACKET
+    q -> . SENTENCE
+    s -> s AND . p
+      --LBRACKET--> I4
+      --SENTENCE--> I5
+      --p--> I9
+      --q--> I3
+
+I7:
+    p -> p OR . q
+    q -> . LBRACKET s RBRACKET
+    q -> . SENTENCE
+      --LBRACKET--> I4
+      --SENTENCE--> I5
+      --q--> I10
+
+I8:
+    q -> LBRACKET s . RBRACKET
+    s -> s . AND p
+      --AND--> I6
+      --RBRACKET--> I11
+
+I9:
+    p -> p . OR q
+    s -> s AND p .
+      --OR--> I7
+
+I10:
+    p -> p OR q .
+
+I11:
+    q -> LBRACKET s RBRACKET .

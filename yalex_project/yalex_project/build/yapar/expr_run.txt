@@ -1,0 +1,250 @@
+
+========================================================================
+Gramática: expr_slr.yalp
+========================================================================
+Tokens declarados : AND, OR, LBRACKET, RBRACKET, SENTENCE
+Tokens ignorados  : (ninguno)
+No-terminales     : p, q, s
+Símbolo inicial   : s
+Producciones:
+  R1: s -> s AND p
+  R2: s -> p
+  R3: p -> p OR q
+  R4: p -> q
+  R5: q -> LBRACKET s RBRACKET
+  R6: q -> SENTENCE
+
+========================================================================
+YALex: expr.yal
+========================================================================
+Lexer generado: build/yapar/expr_lexer.py  (14 estados DFA tras minimización)
+YALex emite   : AND, LBRACKET, OR, RBRACKET, SENTENCE
+YAPar espera  : AND, OR, LBRACKET, RBRACKET, SENTENCE
+Contrato OK: los conjuntos de tokens son consistentes.
+
+========================================================================
+Gramática aumentada
+========================================================================
+  (0) s' -> s  (aceptación)
+  (1) s -> s AND p
+  (2) s -> p
+  (3) p -> p OR q
+  (4) p -> q
+  (5) q -> LBRACKET s RBRACKET
+  (6) q -> SENTENCE
+
+========================================================================
+FIRST / FOLLOW
+========================================================================
+FIRST:
+  s: { LBRACKET, SENTENCE }
+  p: { LBRACKET, SENTENCE }
+  q: { LBRACKET, SENTENCE }
+FOLLOW:
+  s: { $, AND, RBRACKET }
+  p: { $, AND, OR, RBRACKET }
+  q: { $, AND, OR, RBRACKET }
+
+========================================================================
+Autómata LR(0) — 12 estados
+========================================================================
+Autómata LR(0) — expr_slr
+=========================
+
+I0  (inicial):
+    p -> . p OR q
+    p -> . q
+    q -> . LBRACKET s RBRACKET
+    q -> . SENTENCE
+    s -> . p
+    s -> . s AND p
+    s' -> . s
+      --LBRACKET--> I4
+      --SENTENCE--> I5
+      --p--> I2
+      --q--> I3
+      --s--> I1
+
+I1:
+    s -> s . AND p
+    s' -> s .
+      --AND--> I6
+
+I2:
+    p -> p . OR q
+    s -> p .
+      --OR--> I7
+
+I3:
+    p -> q .
+
+I4:
+    p -> . p OR q
+    p -> . q
+    q -> . LBRACKET s RBRACKET
+    q -> . SENTENCE
+    q -> LBRACKET . s RBRACKET
+    s -> . p
+    s -> . s AND p
+      --LBRACKET--> I4
+      --SENTENCE--> I5
+      --p--> I2
+      --q--> I3
+      --s--> I8
+
+I5:
+    q -> SENTENCE .
+
+I6:
+    p -> . p OR q
+    p -> . q
+    q -> . LBRACKET s RBRACKET
+    q -> . SENTENCE
+    s -> s AND . p
+      --LBRACKET--> I4
+      --SENTENCE--> I5
+      --p--> I9
+      --q--> I3
+
+I7:
+    p -> p OR . q
+    q -> . LBRACKET s RBRACKET
+    q -> . SENTENCE
+      --LBRACKET--> I4
+      --SENTENCE--> I5
+      --q--> I10
+
+I8:
+    q -> LBRACKET s . RBRACKET
+    s -> s . AND p
+      --AND--> I6
+      --RBRACKET--> I11
+
+I9:
+    p -> p . OR q
+    s -> s AND p .
+      --OR--> I7
+
+I10:
+    p -> p OR q .
+
+I11:
+    q -> LBRACKET s RBRACKET .
+
+Imágenes/representaciones del autómata LR(0):
+  dot: build/yapar/expr_slr_lr0.dot
+  text: build/yapar/expr_slr_lr0.txt
+  png: build/yapar/expr_slr_lr0.png
+Autómata LALR(1):
+  dot: build/yapar/expr_slr_lalr.dot
+  text: build/yapar/expr_slr_lalr.txt
+  png: build/yapar/expr_slr_lalr.png
+
+========================================================================
+Tabla SLR(1)
+========================================================================
+Tabla de parseo SLR(1)
+======================
+Estado | AND | OR | LBRACKET | RBRACKET | SENTENCE |  $  | s | p | q 
+-------+-----+----+----------+----------+----------+-----+---+---+---
+  0    |     |    |    s4    |          |    s5    |     | 1 | 2 | 3 
+  1    |  s6 |    |          |          |          | acc |   |   |   
+  2    |  r2 | s7 |          |    r2    |          |  r2 |   |   |   
+  3    |  r4 | r4 |          |    r4    |          |  r4 |   |   |   
+  4    |     |    |    s4    |          |    s5    |     | 8 | 2 | 3 
+  5    |  r6 | r6 |          |    r6    |          |  r6 |   |   |   
+  6    |     |    |    s4    |          |    s5    |     |   | 9 | 3 
+  7    |     |    |    s4    |          |    s5    |     |   |   | 10
+  8    |  s6 |    |          |   s11    |          |     |   |   |   
+  9    |  r1 | s7 |          |    r1    |          |  r1 |   |   |   
+  10   |  r3 | r3 |          |    r3    |          |  r3 |   |   |   
+  11   |  r5 | r5 |          |    r5    |          |  r5 |   |   |   
+
+Reglas (r#):
+  accept (S' -> S): s' -> s
+  r1: s -> s AND p
+  r2: s -> p
+  r3: p -> p OR q
+  r4: p -> q
+  r5: q -> LBRACKET s RBRACKET
+  r6: q -> SENTENCE
+
+Sin conflictos: la gramática es compatible con el método elegido.
+Parser autónomo generado: build/yapar/expr_slr_slr_parser.py
+
+========================================================================
+Análisis sintáctico (SLR) de accept_or.txt
+========================================================================
+Tokens: SENTENCE OR SENTENCE $
+
+Stack                  |  Input                   |  Acción
+-----------------------+--------------------------+--------------------------
+0                      |  SENTENCE OR SENTENCE $  |  shift -> I5
+0 SENTENCE 5           |  OR SENTENCE $           |  reduce r6: q -> SENTENCE
+0 q 3                  |  OR SENTENCE $           |  reduce r4: p -> q
+0 p 2                  |  OR SENTENCE $           |  shift -> I7
+0 p 2 OR 7             |  SENTENCE $              |  shift -> I5
+0 p 2 OR 7 SENTENCE 5  |  $                       |  reduce r6: q -> SENTENCE
+0 p 2 OR 7 q 10        |  $                       |  reduce r3: p -> p OR q
+0 p 2                  |  $                       |  reduce r2: s -> p
+0 s 1                  |  $                       |  accept
+
+CADENA ACEPTADA ✓
+Árbol de parseo: build/yapar/expr_slr_slr_tree.png
+
+========================================================================
+Tabla LALR(1)
+========================================================================
+Tabla de parseo LALR(1)
+=======================
+Estado | AND | OR | LBRACKET | RBRACKET | SENTENCE |  $  | s | p | q 
+-------+-----+----+----------+----------+----------+-----+---+---+---
+  0    |     |    |    s4    |          |    s5    |     | 1 | 2 | 3 
+  1    |  s6 |    |          |          |          | acc |   |   |   
+  2    |  r2 | s7 |          |    r2    |          |  r2 |   |   |   
+  3    |  r4 | r4 |          |    r4    |          |  r4 |   |   |   
+  4    |     |    |    s4    |          |    s5    |     | 8 | 2 | 3 
+  5    |  r6 | r6 |          |    r6    |          |  r6 |   |   |   
+  6    |     |    |    s4    |          |    s5    |     |   | 9 | 3 
+  7    |     |    |    s4    |          |    s5    |     |   |   | 10
+  8    |  s6 |    |          |   s11    |          |     |   |   |   
+  9    |  r1 | s7 |          |    r1    |          |  r1 |   |   |   
+  10   |  r3 | r3 |          |    r3    |          |  r3 |   |   |   
+  11   |  r5 | r5 |          |    r5    |          |  r5 |   |   |   
+
+Reglas (r#):
+  accept (S' -> S): s' -> s
+  r1: s -> s AND p
+  r2: s -> p
+  r3: p -> p OR q
+  r4: p -> q
+  r5: q -> LBRACKET s RBRACKET
+  r6: q -> SENTENCE
+
+Sin conflictos: la gramática es compatible con el método elegido.
+Parser autónomo generado: build/yapar/expr_slr_lalr_parser.py
+
+========================================================================
+Análisis sintáctico (LALR) de accept_or.txt
+========================================================================
+Tokens: SENTENCE OR SENTENCE $
+
+Stack                  |  Input                   |  Acción
+-----------------------+--------------------------+--------------------------
+0                      |  SENTENCE OR SENTENCE $  |  shift -> I5
+0 SENTENCE 5           |  OR SENTENCE $           |  reduce r6: q -> SENTENCE
+0 q 3                  |  OR SENTENCE $           |  reduce r4: p -> q
+0 p 2                  |  OR SENTENCE $           |  shift -> I7
+0 p 2 OR 7             |  SENTENCE $              |  shift -> I5
+0 p 2 OR 7 SENTENCE 5  |  $                       |  reduce r6: q -> SENTENCE
+0 p 2 OR 7 q 10        |  $                       |  reduce r3: p -> p OR q
+0 p 2                  |  $                       |  reduce r2: s -> p
+0 s 1                  |  $                       |  accept
+
+CADENA ACEPTADA ✓
+Árbol de parseo: build/yapar/expr_slr_lalr_tree.png
+
+========================================================================
+Listo
+========================================================================
+Artefactos en: build/yapar/

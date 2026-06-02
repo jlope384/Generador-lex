@@ -1,0 +1,58 @@
+Autómata LALR(1) — ptr_lalr
+===========================
+
+I0  (inicial):
+    l -> . ID , $/ASSIGN
+    l -> . STAR r , $/ASSIGN
+    r -> . l , $
+    s -> . l ASSIGN r , $
+    s -> . r , $
+    s' -> . s , $
+      --ID--> I5
+      --STAR--> I4
+      --l--> I2
+      --r--> I3
+      --s--> I1
+
+I1:
+    s' -> s . , $
+
+I2:
+    r -> l . , $
+    s -> l . ASSIGN r , $
+      --ASSIGN--> I6
+
+I3:
+    s -> r . , $
+
+I4:
+    l -> . ID , $/ASSIGN
+    l -> . STAR r , $/ASSIGN
+    l -> STAR . r , $/ASSIGN
+    r -> . l , $/ASSIGN
+      --ID--> I5
+      --STAR--> I4
+      --l--> I7
+      --r--> I8
+
+I5:
+    l -> ID . , $/ASSIGN
+
+I6:
+    l -> . ID , $
+    l -> . STAR r , $
+    r -> . l , $
+    s -> l ASSIGN . r , $
+      --ID--> I5
+      --STAR--> I4
+      --l--> I7
+      --r--> I9
+
+I7:
+    r -> l . , $/ASSIGN
+
+I8:
+    l -> STAR r . , $/ASSIGN
+
+I9:
+    s -> l ASSIGN r . , $

@@ -1,0 +1,32 @@
+digraph LR {
+  rankdir=LR;
+  labelloc="t"; label="Autómata LR(0) — gramática de punteros";
+  node [shape=box, fontname="Courier", fontsize=10];
+  edge [fontname="Courier", fontsize=10];
+  start [shape=point, width=0.12];
+  start -> "I0";
+  "I0" [label="I0\nl -> . ID\ll -> . STAR r\lr -> . l\ls -> . l ASSIGN r\ls -> . r\ls' -> . s\l"];
+  "I1" [label="I1\ns' -> s .\l"];
+  "I2" [label="I2\nr -> l .\ls -> l . ASSIGN r\l"];
+  "I3" [label="I3\ns -> r .\l"];
+  "I4" [label="I4\nl -> . ID\ll -> . STAR r\ll -> STAR . r\lr -> . l\l"];
+  "I5" [label="I5\nl -> ID .\l"];
+  "I6" [label="I6\nl -> . ID\ll -> . STAR r\lr -> . l\ls -> l ASSIGN . r\l"];
+  "I7" [label="I7\nr -> l .\l"];
+  "I8" [label="I8\nl -> STAR r .\l"];
+  "I9" [label="I9\ns -> l ASSIGN r .\l"];
+  "I0" -> "I1" [label="s"];
+  "I0" -> "I2" [label="l"];
+  "I0" -> "I3" [label="r"];
+  "I0" -> "I4" [label="STAR"];
+  "I0" -> "I5" [label="ID"];
+  "I2" -> "I6" [label="ASSIGN"];
+  "I4" -> "I7" [label="l"];
+  "I4" -> "I8" [label="r"];
+  "I4" -> "I4" [label="STAR"];
+  "I4" -> "I5" [label="ID"];
+  "I6" -> "I7" [label="l"];
+  "I6" -> "I9" [label="r"];
+  "I6" -> "I4" [label="STAR"];
+  "I6" -> "I5" [label="ID"];
+}
