@@ -1,0 +1,7 @@
+macro double(n) {
+    let result <- n * 2;
+    emit result;
+}
+
+let val <- 7;
+emit double(val);

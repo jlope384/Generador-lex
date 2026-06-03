@@ -13,7 +13,7 @@ END_MARKER = '$'
 # (head, body, pretty) per production; index 0 is the augmented start (accept).
 PRODUCTIONS = [("s'", ['s'], "s' -> s"), ('s', ['l', 'ASSIGN', 'r'], 's -> l ASSIGN r'), ('s', ['r'], 's -> r'), ('l', ['STAR', 'r'], 'l -> STAR r'), ('l', ['ID'], 'l -> ID'), ('r', ['l'], 'r -> l')]
 # (state, terminal) -> (kind, value);  reduce value is a production index.
-ACTION = {(0, 'STAR'): ('shift', 4), (0, 'ID'): ('shift', 5), (1, '$'): ('accept', None), (2, 'ASSIGN'): ('shift', 6), (2, '$'): ('reduce', 5), (3, '$'): ('reduce', 2), (4, 'STAR'): ('shift', 4), (4, 'ID'): ('shift', 5), (5, '$'): ('reduce', 4), (5, 'ASSIGN'): ('reduce', 4), (6, 'STAR'): ('shift', 4), (6, 'ID'): ('shift', 5), (7, 'ASSIGN'): ('reduce', 5), (7, '$'): ('reduce', 5), (8, 'ASSIGN'): ('reduce', 3), (8, '$'): ('reduce', 3), (9, '$'): ('reduce', 1)}
+ACTION = {(0, 'STAR'): ('shift', 4), (0, 'ID'): ('shift', 5), (1, '$'): ('accept', None), (2, '$'): ('reduce', 5), (2, 'ASSIGN'): ('shift', 6), (3, '$'): ('reduce', 2), (4, 'ID'): ('shift', 5), (4, 'STAR'): ('shift', 4), (5, '$'): ('reduce', 4), (5, 'ASSIGN'): ('reduce', 4), (6, 'ID'): ('shift', 5), (6, 'STAR'): ('shift', 4), (7, 'ASSIGN'): ('reduce', 5), (7, '$'): ('reduce', 5), (8, 'ASSIGN'): ('reduce', 3), (8, '$'): ('reduce', 3), (9, '$'): ('reduce', 1)}
 GOTO = {(0, 'l'): 2, (0, 'r'): 3, (0, 's'): 1, (4, 'l'): 7, (4, 'r'): 8, (6, 'l'): 7, (6, 'r'): 9}
 TERMINALS = ['$', 'ASSIGN', 'ID', 'STAR']
 NON_TERMINALS = ['l', 'r', 's', "s'"]

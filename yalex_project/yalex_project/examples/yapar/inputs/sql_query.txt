@@ -1,0 +1,6 @@
+-- consulta compleja: alias, JOIN, agregacion, WHERE, GROUP BY, ORDER BY
+SELECT DISTINCT u.name, count(o.id) AS total
+FROM users AS u JOIN orders AS o ON u.id = o.user_id
+WHERE u.age >= 18 AND o.total > 100
+GROUP BY u.name
+ORDER BY total DESC

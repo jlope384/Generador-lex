@@ -1,0 +1,892 @@
+Autómata LR(0) — sql
+====================
+
+I0  (inicial):
+    query -> . SELECT proj FROM sources opt_where opt_group opt_order
+    query' -> . query
+      --SELECT--> I2
+      --query--> I1
+
+I1:
+    query' -> query .
+
+I2:
+    add_expr -> . add_expr MINUS mul_expr
+    add_expr -> . add_expr PLUS mul_expr
+    add_expr -> . mul_expr
+    and_expr -> . and_expr AND not_expr
+    and_expr -> . not_expr
+    cmp_expr -> . add_expr
+    cmp_expr -> . cmp_expr comparator add_expr
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    expr -> . and_expr
+    expr -> . expr OR and_expr
+    factor -> . LPAREN expr RPAREN
+    factor -> . NUMBER
+    factor -> . STRING
+    factor -> . column_ref
+    factor -> . func_call
+    func_call -> . IDENT LPAREN STAR RPAREN
+    func_call -> . IDENT LPAREN expr RPAREN
+    mul_expr -> . factor
+    mul_expr -> . mul_expr DIV factor
+    mul_expr -> . mul_expr STAR factor
+    not_expr -> . NOT not_expr
+    not_expr -> . cmp_expr
+    proj -> . DISTINCT proj_list
+    proj -> . STAR
+    proj -> . proj_list
+    proj_item -> . expr
+    proj_item -> . expr AS IDENT
+    proj_list -> . proj_item
+    proj_list -> . proj_list COMMA proj_item
+    query -> SELECT . proj FROM sources opt_where opt_group opt_order
+      --DISTINCT--> I16
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STAR--> I15
+      --STRING--> I20
+      --add_expr--> I10
+      --and_expr--> I7
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --expr--> I6
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I8
+      --proj--> I3
+      --proj_item--> I5
+      --proj_list--> I4
+
+I3:
+    query -> SELECT proj . FROM sources opt_where opt_group opt_order
+      --FROM--> I22
+
+I4:
+    proj -> proj_list .
+    proj_list -> proj_list . COMMA proj_item
+      --COMMA--> I23
+
+I5:
+    proj_list -> proj_item .
+
+I6:
+    expr -> expr . OR and_expr
+    proj_item -> expr .
+    proj_item -> expr . AS IDENT
+      --AS--> I24
+      --OR--> I25
+
+I7:
+    and_expr -> and_expr . AND not_expr
+    expr -> and_expr .
+      --AND--> I26
+
+I8:
+    and_expr -> not_expr .
+
+I9:
+    cmp_expr -> cmp_expr . comparator add_expr
+    comparator -> . EQ
+    comparator -> . GEQ
+    comparator -> . GT
+    comparator -> . LEQ
+    comparator -> . LT
+    comparator -> . NEQ
+    not_expr -> cmp_expr .
+      --EQ--> I28
+      --GEQ--> I33
+      --GT--> I31
+      --LEQ--> I32
+      --LT--> I30
+      --NEQ--> I29
+      --comparator--> I27
+
+I10:
+    add_expr -> add_expr . MINUS mul_expr
+    add_expr -> add_expr . PLUS mul_expr
+    cmp_expr -> add_expr .
+      --MINUS--> I35
+      --PLUS--> I34
+
+I11:
+    add_expr -> mul_expr .
+    mul_expr -> mul_expr . DIV factor
+    mul_expr -> mul_expr . STAR factor
+      --DIV--> I37
+      --STAR--> I36
+
+I12:
+    mul_expr -> factor .
+
+I13:
+    factor -> column_ref .
+
+I14:
+    factor -> func_call .
+
+I15:
+    proj -> STAR .
+
+I16:
+    add_expr -> . add_expr MINUS mul_expr
+    add_expr -> . add_expr PLUS mul_expr
+    add_expr -> . mul_expr
+    and_expr -> . and_expr AND not_expr
+    and_expr -> . not_expr
+    cmp_expr -> . add_expr
+    cmp_expr -> . cmp_expr comparator add_expr
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    expr -> . and_expr
+    expr -> . expr OR and_expr
+    factor -> . LPAREN expr RPAREN
+    factor -> . NUMBER
+    factor -> . STRING
+    factor -> . column_ref
+    factor -> . func_call
+    func_call -> . IDENT LPAREN STAR RPAREN
+    func_call -> . IDENT LPAREN expr RPAREN
+    mul_expr -> . factor
+    mul_expr -> . mul_expr DIV factor
+    mul_expr -> . mul_expr STAR factor
+    not_expr -> . NOT not_expr
+    not_expr -> . cmp_expr
+    proj -> DISTINCT . proj_list
+    proj_item -> . expr
+    proj_item -> . expr AS IDENT
+    proj_list -> . proj_item
+    proj_list -> . proj_list COMMA proj_item
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I10
+      --and_expr--> I7
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --expr--> I6
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I8
+      --proj_item--> I5
+      --proj_list--> I38
+
+I17:
+    column_ref -> IDENT .
+    column_ref -> IDENT . DOT IDENT
+    func_call -> IDENT . LPAREN STAR RPAREN
+    func_call -> IDENT . LPAREN expr RPAREN
+      --DOT--> I40
+      --LPAREN--> I39
+
+I18:
+    add_expr -> . add_expr MINUS mul_expr
+    add_expr -> . add_expr PLUS mul_expr
+    add_expr -> . mul_expr
+    cmp_expr -> . add_expr
+    cmp_expr -> . cmp_expr comparator add_expr
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    factor -> . LPAREN expr RPAREN
+    factor -> . NUMBER
+    factor -> . STRING
+    factor -> . column_ref
+    factor -> . func_call
+    func_call -> . IDENT LPAREN STAR RPAREN
+    func_call -> . IDENT LPAREN expr RPAREN
+    mul_expr -> . factor
+    mul_expr -> . mul_expr DIV factor
+    mul_expr -> . mul_expr STAR factor
+    not_expr -> . NOT not_expr
+    not_expr -> . cmp_expr
+    not_expr -> NOT . not_expr
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I10
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I41
+
+I19:
+    factor -> NUMBER .
+
+I20:
+    factor -> STRING .
+
+I21:
+    add_expr -> . add_expr MINUS mul_expr
+    add_expr -> . add_expr PLUS mul_expr
+    add_expr -> . mul_expr
+    and_expr -> . and_expr AND not_expr
+    and_expr -> . not_expr
+    cmp_expr -> . add_expr
+    cmp_expr -> . cmp_expr comparator add_expr
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    expr -> . and_expr
+    expr -> . expr OR and_expr
+    factor -> . LPAREN expr RPAREN
+    factor -> . NUMBER
+    factor -> . STRING
+    factor -> . column_ref
+    factor -> . func_call
+    factor -> LPAREN . expr RPAREN
+    func_call -> . IDENT LPAREN STAR RPAREN
+    func_call -> . IDENT LPAREN expr RPAREN
+    mul_expr -> . factor
+    mul_expr -> . mul_expr DIV factor
+    mul_expr -> . mul_expr STAR factor
+    not_expr -> . NOT not_expr
+    not_expr -> . cmp_expr
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I10
+      --and_expr--> I7
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --expr--> I42
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I8
+
+I22:
+    query -> SELECT proj FROM . sources opt_where opt_group opt_order
+    sources -> . sources COMMA table_ref
+    sources -> . sources JOIN table_ref ON expr
+    sources -> . table_ref
+    table_ref -> . IDENT
+    table_ref -> . IDENT AS IDENT
+      --IDENT--> I45
+      --sources--> I43
+      --table_ref--> I44
+
+I23:
+    add_expr -> . add_expr MINUS mul_expr
+    add_expr -> . add_expr PLUS mul_expr
+    add_expr -> . mul_expr
+    and_expr -> . and_expr AND not_expr
+    and_expr -> . not_expr
+    cmp_expr -> . add_expr
+    cmp_expr -> . cmp_expr comparator add_expr
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    expr -> . and_expr
+    expr -> . expr OR and_expr
+    factor -> . LPAREN expr RPAREN
+    factor -> . NUMBER
+    factor -> . STRING
+    factor -> . column_ref
+    factor -> . func_call
+    func_call -> . IDENT LPAREN STAR RPAREN
+    func_call -> . IDENT LPAREN expr RPAREN
+    mul_expr -> . factor
+    mul_expr -> . mul_expr DIV factor
+    mul_expr -> . mul_expr STAR factor
+    not_expr -> . NOT not_expr
+    not_expr -> . cmp_expr
+    proj_item -> . expr
+    proj_item -> . expr AS IDENT
+    proj_list -> proj_list COMMA . proj_item
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I10
+      --and_expr--> I7
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --expr--> I6
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I8
+      --proj_item--> I46
+
+I24:
+    proj_item -> expr AS . IDENT
+      --IDENT--> I47
+
+I25:
+    add_expr -> . add_expr MINUS mul_expr
+    add_expr -> . add_expr PLUS mul_expr
+    add_expr -> . mul_expr
+    and_expr -> . and_expr AND not_expr
+    and_expr -> . not_expr
+    cmp_expr -> . add_expr
+    cmp_expr -> . cmp_expr comparator add_expr
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    expr -> expr OR . and_expr
+    factor -> . LPAREN expr RPAREN
+    factor -> . NUMBER
+    factor -> . STRING
+    factor -> . column_ref
+    factor -> . func_call
+    func_call -> . IDENT LPAREN STAR RPAREN
+    func_call -> . IDENT LPAREN expr RPAREN
+    mul_expr -> . factor
+    mul_expr -> . mul_expr DIV factor
+    mul_expr -> . mul_expr STAR factor
+    not_expr -> . NOT not_expr
+    not_expr -> . cmp_expr
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I10
+      --and_expr--> I48
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I8
+
+I26:
+    add_expr -> . add_expr MINUS mul_expr
+    add_expr -> . add_expr PLUS mul_expr
+    add_expr -> . mul_expr
+    and_expr -> and_expr AND . not_expr
+    cmp_expr -> . add_expr
+    cmp_expr -> . cmp_expr comparator add_expr
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    factor -> . LPAREN expr RPAREN
+    factor -> . NUMBER
+    factor -> . STRING
+    factor -> . column_ref
+    factor -> . func_call
+    func_call -> . IDENT LPAREN STAR RPAREN
+    func_call -> . IDENT LPAREN expr RPAREN
+    mul_expr -> . factor
+    mul_expr -> . mul_expr DIV factor
+    mul_expr -> . mul_expr STAR factor
+    not_expr -> . NOT not_expr
+    not_expr -> . cmp_expr
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I10
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I49
+
+I27:
+    add_expr -> . add_expr MINUS mul_expr
+    add_expr -> . add_expr PLUS mul_expr
+    add_expr -> . mul_expr
+    cmp_expr -> cmp_expr comparator . add_expr
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    factor -> . LPAREN expr RPAREN
+    factor -> . NUMBER
+    factor -> . STRING
+    factor -> . column_ref
+    factor -> . func_call
+    func_call -> . IDENT LPAREN STAR RPAREN
+    func_call -> . IDENT LPAREN expr RPAREN
+    mul_expr -> . factor
+    mul_expr -> . mul_expr DIV factor
+    mul_expr -> . mul_expr STAR factor
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I50
+      --column_ref--> I13
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+
+I28:
+    comparator -> EQ .
+
+I29:
+    comparator -> NEQ .
+
+I30:
+    comparator -> LT .
+
+I31:
+    comparator -> GT .
+
+I32:
+    comparator -> LEQ .
+
+I33:
+    comparator -> GEQ .
+
+I34:
+    add_expr -> add_expr PLUS . mul_expr
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    factor -> . LPAREN expr RPAREN
+    factor -> . NUMBER
+    factor -> . STRING
+    factor -> . column_ref
+    factor -> . func_call
+    func_call -> . IDENT LPAREN STAR RPAREN
+    func_call -> . IDENT LPAREN expr RPAREN
+    mul_expr -> . factor
+    mul_expr -> . mul_expr DIV factor
+    mul_expr -> . mul_expr STAR factor
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NUMBER--> I19
+      --STRING--> I20
+      --column_ref--> I13
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I51
+
+I35:
+    add_expr -> add_expr MINUS . mul_expr
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    factor -> . LPAREN expr RPAREN
+    factor -> . NUMBER
+    factor -> . STRING
+    factor -> . column_ref
+    factor -> . func_call
+    func_call -> . IDENT LPAREN STAR RPAREN
+    func_call -> . IDENT LPAREN expr RPAREN
+    mul_expr -> . factor
+    mul_expr -> . mul_expr DIV factor
+    mul_expr -> . mul_expr STAR factor
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NUMBER--> I19
+      --STRING--> I20
+      --column_ref--> I13
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I52
+
+I36:
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    factor -> . LPAREN expr RPAREN
+    factor -> . NUMBER
+    factor -> . STRING
+    factor -> . column_ref
+    factor -> . func_call
+    func_call -> . IDENT LPAREN STAR RPAREN
+    func_call -> . IDENT LPAREN expr RPAREN
+    mul_expr -> mul_expr STAR . factor
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NUMBER--> I19
+      --STRING--> I20
+      --column_ref--> I13
+      --factor--> I53
+      --func_call--> I14
+
+I37:
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    factor -> . LPAREN expr RPAREN
+    factor -> . NUMBER
+    factor -> . STRING
+    factor -> . column_ref
+    factor -> . func_call
+    func_call -> . IDENT LPAREN STAR RPAREN
+    func_call -> . IDENT LPAREN expr RPAREN
+    mul_expr -> mul_expr DIV . factor
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NUMBER--> I19
+      --STRING--> I20
+      --column_ref--> I13
+      --factor--> I54
+      --func_call--> I14
+
+I38:
+    proj -> DISTINCT proj_list .
+    proj_list -> proj_list . COMMA proj_item
+      --COMMA--> I23
+
+I39:
+    add_expr -> . add_expr MINUS mul_expr
+    add_expr -> . add_expr PLUS mul_expr
+    add_expr -> . mul_expr
+    and_expr -> . and_expr AND not_expr
+    and_expr -> . not_expr
+    cmp_expr -> . add_expr
+    cmp_expr -> . cmp_expr comparator add_expr
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    expr -> . and_expr
+    expr -> . expr OR and_expr
+    factor -> . LPAREN expr RPAREN
+    factor -> . NUMBER
+    factor -> . STRING
+    factor -> . column_ref
+    factor -> . func_call
+    func_call -> . IDENT LPAREN STAR RPAREN
+    func_call -> . IDENT LPAREN expr RPAREN
+    func_call -> IDENT LPAREN . STAR RPAREN
+    func_call -> IDENT LPAREN . expr RPAREN
+    mul_expr -> . factor
+    mul_expr -> . mul_expr DIV factor
+    mul_expr -> . mul_expr STAR factor
+    not_expr -> . NOT not_expr
+    not_expr -> . cmp_expr
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STAR--> I56
+      --STRING--> I20
+      --add_expr--> I10
+      --and_expr--> I7
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --expr--> I55
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I8
+
+I40:
+    column_ref -> IDENT DOT . IDENT
+      --IDENT--> I57
+
+I41:
+    not_expr -> NOT not_expr .
+
+I42:
+    expr -> expr . OR and_expr
+    factor -> LPAREN expr . RPAREN
+      --OR--> I25
+      --RPAREN--> I58
+
+I43:
+    opt_where -> .
+    opt_where -> . WHERE expr
+    query -> SELECT proj FROM sources . opt_where opt_group opt_order
+    sources -> sources . COMMA table_ref
+    sources -> sources . JOIN table_ref ON expr
+      --COMMA--> I60
+      --JOIN--> I61
+      --WHERE--> I62
+      --opt_where--> I59
+
+I44:
+    sources -> table_ref .
+
+I45:
+    table_ref -> IDENT .
+    table_ref -> IDENT . AS IDENT
+      --AS--> I63
+
+I46:
+    proj_list -> proj_list COMMA proj_item .
+
+I47:
+    proj_item -> expr AS IDENT .
+
+I48:
+    and_expr -> and_expr . AND not_expr
+    expr -> expr OR and_expr .
+      --AND--> I26
+
+I49:
+    and_expr -> and_expr AND not_expr .
+
+I50:
+    add_expr -> add_expr . MINUS mul_expr
+    add_expr -> add_expr . PLUS mul_expr
+    cmp_expr -> cmp_expr comparator add_expr .
+      --MINUS--> I35
+      --PLUS--> I34
+
+I51:
+    add_expr -> add_expr PLUS mul_expr .
+    mul_expr -> mul_expr . DIV factor
+    mul_expr -> mul_expr . STAR factor
+      --DIV--> I37
+      --STAR--> I36
+
+I52:
+    add_expr -> add_expr MINUS mul_expr .
+    mul_expr -> mul_expr . DIV factor
+    mul_expr -> mul_expr . STAR factor
+      --DIV--> I37
+      --STAR--> I36
+
+I53:
+    mul_expr -> mul_expr STAR factor .
+
+I54:
+    mul_expr -> mul_expr DIV factor .
+
+I55:
+    expr -> expr . OR and_expr
+    func_call -> IDENT LPAREN expr . RPAREN
+      --OR--> I25
+      --RPAREN--> I64
+
+I56:
+    func_call -> IDENT LPAREN STAR . RPAREN
+      --RPAREN--> I65
+
+I57:
+    column_ref -> IDENT DOT IDENT .
+
+I58:
+    factor -> LPAREN expr RPAREN .
+
+I59:
+    opt_group -> .
+    opt_group -> . GROUP BY group_list
+    query -> SELECT proj FROM sources opt_where . opt_group opt_order
+      --GROUP--> I67
+      --opt_group--> I66
+
+I60:
+    sources -> sources COMMA . table_ref
+    table_ref -> . IDENT
+    table_ref -> . IDENT AS IDENT
+      --IDENT--> I45
+      --table_ref--> I68
+
+I61:
+    sources -> sources JOIN . table_ref ON expr
+    table_ref -> . IDENT
+    table_ref -> . IDENT AS IDENT
+      --IDENT--> I45
+      --table_ref--> I69
+
+I62:
+    add_expr -> . add_expr MINUS mul_expr
+    add_expr -> . add_expr PLUS mul_expr
+    add_expr -> . mul_expr
+    and_expr -> . and_expr AND not_expr
+    and_expr -> . not_expr
+    cmp_expr -> . add_expr
+    cmp_expr -> . cmp_expr comparator add_expr
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    expr -> . and_expr
+    expr -> . expr OR and_expr
+    factor -> . LPAREN expr RPAREN
+    factor -> . NUMBER
+    factor -> . STRING
+    factor -> . column_ref
+    factor -> . func_call
+    func_call -> . IDENT LPAREN STAR RPAREN
+    func_call -> . IDENT LPAREN expr RPAREN
+    mul_expr -> . factor
+    mul_expr -> . mul_expr DIV factor
+    mul_expr -> . mul_expr STAR factor
+    not_expr -> . NOT not_expr
+    not_expr -> . cmp_expr
+    opt_where -> WHERE . expr
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I10
+      --and_expr--> I7
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --expr--> I70
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I8
+
+I63:
+    table_ref -> IDENT AS . IDENT
+      --IDENT--> I71
+
+I64:
+    func_call -> IDENT LPAREN expr RPAREN .
+
+I65:
+    func_call -> IDENT LPAREN STAR RPAREN .
+
+I66:
+    opt_order -> .
+    opt_order -> . ORDER BY order_list
+    query -> SELECT proj FROM sources opt_where opt_group . opt_order
+      --ORDER--> I73
+      --opt_order--> I72
+
+I67:
+    opt_group -> GROUP . BY group_list
+      --BY--> I74
+
+I68:
+    sources -> sources COMMA table_ref .
+
+I69:
+    sources -> sources JOIN table_ref . ON expr
+      --ON--> I75
+
+I70:
+    expr -> expr . OR and_expr
+    opt_where -> WHERE expr .
+      --OR--> I25
+
+I71:
+    table_ref -> IDENT AS IDENT .
+
+I72:
+    query -> SELECT proj FROM sources opt_where opt_group opt_order .
+
+I73:
+    opt_order -> ORDER . BY order_list
+      --BY--> I76
+
+I74:
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    group_list -> . column_ref
+    group_list -> . group_list COMMA column_ref
+    opt_group -> GROUP BY . group_list
+      --IDENT--> I79
+      --column_ref--> I78
+      --group_list--> I77
+
+I75:
+    add_expr -> . add_expr MINUS mul_expr
+    add_expr -> . add_expr PLUS mul_expr
+    add_expr -> . mul_expr
+    and_expr -> . and_expr AND not_expr
+    and_expr -> . not_expr
+    cmp_expr -> . add_expr
+    cmp_expr -> . cmp_expr comparator add_expr
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    expr -> . and_expr
+    expr -> . expr OR and_expr
+    factor -> . LPAREN expr RPAREN
+    factor -> . NUMBER
+    factor -> . STRING
+    factor -> . column_ref
+    factor -> . func_call
+    func_call -> . IDENT LPAREN STAR RPAREN
+    func_call -> . IDENT LPAREN expr RPAREN
+    mul_expr -> . factor
+    mul_expr -> . mul_expr DIV factor
+    mul_expr -> . mul_expr STAR factor
+    not_expr -> . NOT not_expr
+    not_expr -> . cmp_expr
+    sources -> sources JOIN table_ref ON . expr
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I10
+      --and_expr--> I7
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --expr--> I80
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I8
+
+I76:
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    opt_order -> ORDER BY . order_list
+    order_item -> . column_ref
+    order_item -> . column_ref ASC
+    order_item -> . column_ref DESC
+    order_list -> . order_item
+    order_list -> . order_list COMMA order_item
+      --IDENT--> I79
+      --column_ref--> I83
+      --order_item--> I82
+      --order_list--> I81
+
+I77:
+    group_list -> group_list . COMMA column_ref
+    opt_group -> GROUP BY group_list .
+      --COMMA--> I84
+
+I78:
+    group_list -> column_ref .
+
+I79:
+    column_ref -> IDENT .
+    column_ref -> IDENT . DOT IDENT
+      --DOT--> I40
+
+I80:
+    expr -> expr . OR and_expr
+    sources -> sources JOIN table_ref ON expr .
+      --OR--> I25
+
+I81:
+    opt_order -> ORDER BY order_list .
+    order_list -> order_list . COMMA order_item
+      --COMMA--> I85
+
+I82:
+    order_list -> order_item .
+
+I83:
+    order_item -> column_ref .
+    order_item -> column_ref . ASC
+    order_item -> column_ref . DESC
+      --ASC--> I86
+      --DESC--> I87
+
+I84:
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    group_list -> group_list COMMA . column_ref
+      --IDENT--> I79
+      --column_ref--> I88
+
+I85:
+    column_ref -> . IDENT
+    column_ref -> . IDENT DOT IDENT
+    order_item -> . column_ref
+    order_item -> . column_ref ASC
+    order_item -> . column_ref DESC
+    order_list -> order_list COMMA . order_item
+      --IDENT--> I79
+      --column_ref--> I83
+      --order_item--> I89
+
+I86:
+    order_item -> column_ref ASC .
+
+I87:
+    order_item -> column_ref DESC .
+
+I88:
+    group_list -> group_list COMMA column_ref .
+
+I89:
+    order_list -> order_list COMMA order_item .

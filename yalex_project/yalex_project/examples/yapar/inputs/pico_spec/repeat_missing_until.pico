@@ -1,0 +1,6 @@
+let i <- 0;
+repeat {
+    emit i;
+    let i <- i + 1;
+}
+emit "done";

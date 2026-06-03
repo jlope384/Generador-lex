@@ -1,0 +1,4 @@
+macro greet() {
+    emit "Hello!";
+}
+emit greet();

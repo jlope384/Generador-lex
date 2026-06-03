@@ -1,0 +1,892 @@
+Autómata LALR(1) — sql
+======================
+
+I0  (inicial):
+    query -> . SELECT proj FROM sources opt_where opt_group opt_order , $
+    query' -> . query , $
+      --SELECT--> I2
+      --query--> I1
+
+I1:
+    query' -> query . , $
+
+I2:
+    add_expr -> . add_expr MINUS mul_expr , AND/AS/COMMA/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS
+    add_expr -> . add_expr PLUS mul_expr , AND/AS/COMMA/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS
+    add_expr -> . mul_expr , AND/AS/COMMA/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS
+    and_expr -> . and_expr AND not_expr , AND/AS/COMMA/FROM/OR
+    and_expr -> . not_expr , AND/AS/COMMA/FROM/OR
+    cmp_expr -> . add_expr , AND/AS/COMMA/EQ/FROM/GEQ/GT/LEQ/LT/NEQ/OR
+    cmp_expr -> . cmp_expr comparator add_expr , AND/AS/COMMA/EQ/FROM/GEQ/GT/LEQ/LT/NEQ/OR
+    column_ref -> . IDENT , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    column_ref -> . IDENT DOT IDENT , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    expr -> . and_expr , AS/COMMA/FROM/OR
+    expr -> . expr OR and_expr , AS/COMMA/FROM/OR
+    factor -> . LPAREN expr RPAREN , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    factor -> . NUMBER , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    factor -> . STRING , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    factor -> . column_ref , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    factor -> . func_call , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    func_call -> . IDENT LPAREN STAR RPAREN , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    func_call -> . IDENT LPAREN expr RPAREN , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    mul_expr -> . factor , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    mul_expr -> . mul_expr DIV factor , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    mul_expr -> . mul_expr STAR factor , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    not_expr -> . NOT not_expr , AND/AS/COMMA/FROM/OR
+    not_expr -> . cmp_expr , AND/AS/COMMA/FROM/OR
+    proj -> . DISTINCT proj_list , FROM
+    proj -> . STAR , FROM
+    proj -> . proj_list , FROM
+    proj_item -> . expr , COMMA/FROM
+    proj_item -> . expr AS IDENT , COMMA/FROM
+    proj_list -> . proj_item , COMMA/FROM
+    proj_list -> . proj_list COMMA proj_item , COMMA/FROM
+    query -> SELECT . proj FROM sources opt_where opt_group opt_order , $
+      --DISTINCT--> I16
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STAR--> I15
+      --STRING--> I20
+      --add_expr--> I10
+      --and_expr--> I7
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --expr--> I6
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I8
+      --proj--> I3
+      --proj_item--> I5
+      --proj_list--> I4
+
+I3:
+    query -> SELECT proj . FROM sources opt_where opt_group opt_order , $
+      --FROM--> I22
+
+I4:
+    proj -> proj_list . , FROM
+    proj_list -> proj_list . COMMA proj_item , COMMA/FROM
+      --COMMA--> I23
+
+I5:
+    proj_list -> proj_item . , COMMA/FROM
+
+I6:
+    expr -> expr . OR and_expr , AS/COMMA/FROM/OR
+    proj_item -> expr . , COMMA/FROM
+    proj_item -> expr . AS IDENT , COMMA/FROM
+      --AS--> I24
+      --OR--> I25
+
+I7:
+    and_expr -> and_expr . AND not_expr , $/AND/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+    expr -> and_expr . , $/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+      --AND--> I26
+
+I8:
+    and_expr -> not_expr . , $/AND/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+
+I9:
+    cmp_expr -> cmp_expr . comparator add_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/NEQ/OR/ORDER/RPAREN/WHERE
+    comparator -> . EQ , IDENT/LPAREN/NUMBER/STRING
+    comparator -> . GEQ , IDENT/LPAREN/NUMBER/STRING
+    comparator -> . GT , IDENT/LPAREN/NUMBER/STRING
+    comparator -> . LEQ , IDENT/LPAREN/NUMBER/STRING
+    comparator -> . LT , IDENT/LPAREN/NUMBER/STRING
+    comparator -> . NEQ , IDENT/LPAREN/NUMBER/STRING
+    not_expr -> cmp_expr . , $/AND/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+      --EQ--> I28
+      --GEQ--> I33
+      --GT--> I31
+      --LEQ--> I32
+      --LT--> I30
+      --NEQ--> I29
+      --comparator--> I27
+
+I10:
+    add_expr -> add_expr . MINUS mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    add_expr -> add_expr . PLUS mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    cmp_expr -> add_expr . , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/NEQ/OR/ORDER/RPAREN/WHERE
+      --MINUS--> I35
+      --PLUS--> I34
+
+I11:
+    add_expr -> mul_expr . , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    mul_expr -> mul_expr . DIV factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> mul_expr . STAR factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+      --DIV--> I37
+      --STAR--> I36
+
+I12:
+    mul_expr -> factor . , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+
+I13:
+    factor -> column_ref . , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+
+I14:
+    factor -> func_call . , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+
+I15:
+    proj -> STAR . , FROM
+
+I16:
+    add_expr -> . add_expr MINUS mul_expr , AND/AS/COMMA/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS
+    add_expr -> . add_expr PLUS mul_expr , AND/AS/COMMA/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS
+    add_expr -> . mul_expr , AND/AS/COMMA/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS
+    and_expr -> . and_expr AND not_expr , AND/AS/COMMA/FROM/OR
+    and_expr -> . not_expr , AND/AS/COMMA/FROM/OR
+    cmp_expr -> . add_expr , AND/AS/COMMA/EQ/FROM/GEQ/GT/LEQ/LT/NEQ/OR
+    cmp_expr -> . cmp_expr comparator add_expr , AND/AS/COMMA/EQ/FROM/GEQ/GT/LEQ/LT/NEQ/OR
+    column_ref -> . IDENT , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    column_ref -> . IDENT DOT IDENT , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    expr -> . and_expr , AS/COMMA/FROM/OR
+    expr -> . expr OR and_expr , AS/COMMA/FROM/OR
+    factor -> . LPAREN expr RPAREN , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    factor -> . NUMBER , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    factor -> . STRING , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    factor -> . column_ref , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    factor -> . func_call , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    func_call -> . IDENT LPAREN STAR RPAREN , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    func_call -> . IDENT LPAREN expr RPAREN , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    mul_expr -> . factor , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    mul_expr -> . mul_expr DIV factor , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    mul_expr -> . mul_expr STAR factor , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    not_expr -> . NOT not_expr , AND/AS/COMMA/FROM/OR
+    not_expr -> . cmp_expr , AND/AS/COMMA/FROM/OR
+    proj -> DISTINCT . proj_list , FROM
+    proj_item -> . expr , COMMA/FROM
+    proj_item -> . expr AS IDENT , COMMA/FROM
+    proj_list -> . proj_item , COMMA/FROM
+    proj_list -> . proj_list COMMA proj_item , COMMA/FROM
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I10
+      --and_expr--> I7
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --expr--> I6
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I8
+      --proj_item--> I5
+      --proj_list--> I38
+
+I17:
+    column_ref -> IDENT . , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    column_ref -> IDENT . DOT IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> IDENT . LPAREN STAR RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> IDENT . LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+      --DOT--> I40
+      --LPAREN--> I39
+
+I18:
+    add_expr -> . add_expr MINUS mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    add_expr -> . add_expr PLUS mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    add_expr -> . mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    cmp_expr -> . add_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/NEQ/OR/ORDER/RPAREN/WHERE
+    cmp_expr -> . cmp_expr comparator add_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/NEQ/OR/ORDER/RPAREN/WHERE
+    column_ref -> . IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    column_ref -> . IDENT DOT IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . NUMBER , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . STRING , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . column_ref , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . func_call , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN STAR RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . mul_expr DIV factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . mul_expr STAR factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    not_expr -> . NOT not_expr , $/AND/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+    not_expr -> . cmp_expr , $/AND/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+    not_expr -> NOT . not_expr , $/AND/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I10
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I41
+
+I19:
+    factor -> NUMBER . , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+
+I20:
+    factor -> STRING . , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+
+I21:
+    add_expr -> . add_expr MINUS mul_expr , AND/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN
+    add_expr -> . add_expr PLUS mul_expr , AND/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN
+    add_expr -> . mul_expr , AND/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN
+    and_expr -> . and_expr AND not_expr , AND/OR/RPAREN
+    and_expr -> . not_expr , AND/OR/RPAREN
+    cmp_expr -> . add_expr , AND/EQ/GEQ/GT/LEQ/LT/NEQ/OR/RPAREN
+    cmp_expr -> . cmp_expr comparator add_expr , AND/EQ/GEQ/GT/LEQ/LT/NEQ/OR/RPAREN
+    column_ref -> . IDENT , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    column_ref -> . IDENT DOT IDENT , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    expr -> . and_expr , OR/RPAREN
+    expr -> . expr OR and_expr , OR/RPAREN
+    factor -> . LPAREN expr RPAREN , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    factor -> . NUMBER , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    factor -> . STRING , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    factor -> . column_ref , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    factor -> . func_call , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    factor -> LPAREN . expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN STAR RPAREN , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    func_call -> . IDENT LPAREN expr RPAREN , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    mul_expr -> . factor , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    mul_expr -> . mul_expr DIV factor , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    mul_expr -> . mul_expr STAR factor , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    not_expr -> . NOT not_expr , AND/OR/RPAREN
+    not_expr -> . cmp_expr , AND/OR/RPAREN
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I10
+      --and_expr--> I7
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --expr--> I42
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I8
+
+I22:
+    query -> SELECT proj FROM . sources opt_where opt_group opt_order , $
+    sources -> . sources COMMA table_ref , $/COMMA/GROUP/JOIN/ORDER/WHERE
+    sources -> . sources JOIN table_ref ON expr , $/COMMA/GROUP/JOIN/ORDER/WHERE
+    sources -> . table_ref , $/COMMA/GROUP/JOIN/ORDER/WHERE
+    table_ref -> . IDENT , $/COMMA/GROUP/JOIN/ORDER/WHERE
+    table_ref -> . IDENT AS IDENT , $/COMMA/GROUP/JOIN/ORDER/WHERE
+      --IDENT--> I45
+      --sources--> I43
+      --table_ref--> I44
+
+I23:
+    add_expr -> . add_expr MINUS mul_expr , AND/AS/COMMA/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS
+    add_expr -> . add_expr PLUS mul_expr , AND/AS/COMMA/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS
+    add_expr -> . mul_expr , AND/AS/COMMA/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS
+    and_expr -> . and_expr AND not_expr , AND/AS/COMMA/FROM/OR
+    and_expr -> . not_expr , AND/AS/COMMA/FROM/OR
+    cmp_expr -> . add_expr , AND/AS/COMMA/EQ/FROM/GEQ/GT/LEQ/LT/NEQ/OR
+    cmp_expr -> . cmp_expr comparator add_expr , AND/AS/COMMA/EQ/FROM/GEQ/GT/LEQ/LT/NEQ/OR
+    column_ref -> . IDENT , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    column_ref -> . IDENT DOT IDENT , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    expr -> . and_expr , AS/COMMA/FROM/OR
+    expr -> . expr OR and_expr , AS/COMMA/FROM/OR
+    factor -> . LPAREN expr RPAREN , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    factor -> . NUMBER , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    factor -> . STRING , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    factor -> . column_ref , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    factor -> . func_call , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    func_call -> . IDENT LPAREN STAR RPAREN , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    func_call -> . IDENT LPAREN expr RPAREN , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    mul_expr -> . factor , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    mul_expr -> . mul_expr DIV factor , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    mul_expr -> . mul_expr STAR factor , AND/AS/COMMA/DIV/EQ/FROM/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/STAR
+    not_expr -> . NOT not_expr , AND/AS/COMMA/FROM/OR
+    not_expr -> . cmp_expr , AND/AS/COMMA/FROM/OR
+    proj_item -> . expr , COMMA/FROM
+    proj_item -> . expr AS IDENT , COMMA/FROM
+    proj_list -> proj_list COMMA . proj_item , COMMA/FROM
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I10
+      --and_expr--> I7
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --expr--> I6
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I8
+      --proj_item--> I46
+
+I24:
+    proj_item -> expr AS . IDENT , COMMA/FROM
+      --IDENT--> I47
+
+I25:
+    add_expr -> . add_expr MINUS mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    add_expr -> . add_expr PLUS mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    add_expr -> . mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    and_expr -> . and_expr AND not_expr , $/AND/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+    and_expr -> . not_expr , $/AND/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+    cmp_expr -> . add_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/NEQ/OR/ORDER/RPAREN/WHERE
+    cmp_expr -> . cmp_expr comparator add_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/NEQ/OR/ORDER/RPAREN/WHERE
+    column_ref -> . IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    column_ref -> . IDENT DOT IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    expr -> expr OR . and_expr , $/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+    factor -> . LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . NUMBER , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . STRING , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . column_ref , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . func_call , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN STAR RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . mul_expr DIV factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . mul_expr STAR factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    not_expr -> . NOT not_expr , $/AND/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+    not_expr -> . cmp_expr , $/AND/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I10
+      --and_expr--> I48
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I8
+
+I26:
+    add_expr -> . add_expr MINUS mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    add_expr -> . add_expr PLUS mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    add_expr -> . mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    and_expr -> and_expr AND . not_expr , $/AND/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+    cmp_expr -> . add_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/NEQ/OR/ORDER/RPAREN/WHERE
+    cmp_expr -> . cmp_expr comparator add_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/NEQ/OR/ORDER/RPAREN/WHERE
+    column_ref -> . IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    column_ref -> . IDENT DOT IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . NUMBER , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . STRING , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . column_ref , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . func_call , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN STAR RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . mul_expr DIV factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . mul_expr STAR factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    not_expr -> . NOT not_expr , $/AND/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+    not_expr -> . cmp_expr , $/AND/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I10
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I49
+
+I27:
+    add_expr -> . add_expr MINUS mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    add_expr -> . add_expr PLUS mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    add_expr -> . mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    cmp_expr -> cmp_expr comparator . add_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/NEQ/OR/ORDER/RPAREN/WHERE
+    column_ref -> . IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    column_ref -> . IDENT DOT IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . NUMBER , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . STRING , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . column_ref , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . func_call , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN STAR RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . mul_expr DIV factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . mul_expr STAR factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I50
+      --column_ref--> I13
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+
+I28:
+    comparator -> EQ . , IDENT/LPAREN/NUMBER/STRING
+
+I29:
+    comparator -> NEQ . , IDENT/LPAREN/NUMBER/STRING
+
+I30:
+    comparator -> LT . , IDENT/LPAREN/NUMBER/STRING
+
+I31:
+    comparator -> GT . , IDENT/LPAREN/NUMBER/STRING
+
+I32:
+    comparator -> LEQ . , IDENT/LPAREN/NUMBER/STRING
+
+I33:
+    comparator -> GEQ . , IDENT/LPAREN/NUMBER/STRING
+
+I34:
+    add_expr -> add_expr PLUS . mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    column_ref -> . IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    column_ref -> . IDENT DOT IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . NUMBER , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . STRING , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . column_ref , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . func_call , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN STAR RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . mul_expr DIV factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . mul_expr STAR factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NUMBER--> I19
+      --STRING--> I20
+      --column_ref--> I13
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I51
+
+I35:
+    add_expr -> add_expr MINUS . mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    column_ref -> . IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    column_ref -> . IDENT DOT IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . NUMBER , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . STRING , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . column_ref , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . func_call , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN STAR RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . mul_expr DIV factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . mul_expr STAR factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NUMBER--> I19
+      --STRING--> I20
+      --column_ref--> I13
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I52
+
+I36:
+    column_ref -> . IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    column_ref -> . IDENT DOT IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . NUMBER , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . STRING , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . column_ref , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . func_call , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN STAR RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> mul_expr STAR . factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NUMBER--> I19
+      --STRING--> I20
+      --column_ref--> I13
+      --factor--> I53
+      --func_call--> I14
+
+I37:
+    column_ref -> . IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    column_ref -> . IDENT DOT IDENT , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . NUMBER , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . STRING , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . column_ref , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    factor -> . func_call , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN STAR RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> . IDENT LPAREN expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> mul_expr DIV . factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NUMBER--> I19
+      --STRING--> I20
+      --column_ref--> I13
+      --factor--> I54
+      --func_call--> I14
+
+I38:
+    proj -> DISTINCT proj_list . , FROM
+    proj_list -> proj_list . COMMA proj_item , COMMA/FROM
+      --COMMA--> I23
+
+I39:
+    add_expr -> . add_expr MINUS mul_expr , AND/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN
+    add_expr -> . add_expr PLUS mul_expr , AND/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN
+    add_expr -> . mul_expr , AND/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN
+    and_expr -> . and_expr AND not_expr , AND/OR/RPAREN
+    and_expr -> . not_expr , AND/OR/RPAREN
+    cmp_expr -> . add_expr , AND/EQ/GEQ/GT/LEQ/LT/NEQ/OR/RPAREN
+    cmp_expr -> . cmp_expr comparator add_expr , AND/EQ/GEQ/GT/LEQ/LT/NEQ/OR/RPAREN
+    column_ref -> . IDENT , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    column_ref -> . IDENT DOT IDENT , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    expr -> . and_expr , OR/RPAREN
+    expr -> . expr OR and_expr , OR/RPAREN
+    factor -> . LPAREN expr RPAREN , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    factor -> . NUMBER , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    factor -> . STRING , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    factor -> . column_ref , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    factor -> . func_call , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    func_call -> . IDENT LPAREN STAR RPAREN , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    func_call -> . IDENT LPAREN expr RPAREN , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    func_call -> IDENT LPAREN . STAR RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    func_call -> IDENT LPAREN . expr RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> . factor , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    mul_expr -> . mul_expr DIV factor , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    mul_expr -> . mul_expr STAR factor , AND/DIV/EQ/GEQ/GT/LEQ/LT/MINUS/NEQ/OR/PLUS/RPAREN/STAR
+    not_expr -> . NOT not_expr , AND/OR/RPAREN
+    not_expr -> . cmp_expr , AND/OR/RPAREN
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STAR--> I56
+      --STRING--> I20
+      --add_expr--> I10
+      --and_expr--> I7
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --expr--> I55
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I8
+
+I40:
+    column_ref -> IDENT DOT . IDENT , $/AND/AS/ASC/COMMA/DESC/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+      --IDENT--> I57
+
+I41:
+    not_expr -> NOT not_expr . , $/AND/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+
+I42:
+    expr -> expr . OR and_expr , OR/RPAREN
+    factor -> LPAREN expr . RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+      --OR--> I25
+      --RPAREN--> I58
+
+I43:
+    opt_where -> . , $/GROUP/ORDER
+    opt_where -> . WHERE expr , $/GROUP/ORDER
+    query -> SELECT proj FROM sources . opt_where opt_group opt_order , $
+    sources -> sources . COMMA table_ref , $/COMMA/GROUP/JOIN/ORDER/WHERE
+    sources -> sources . JOIN table_ref ON expr , $/COMMA/GROUP/JOIN/ORDER/WHERE
+      --COMMA--> I60
+      --JOIN--> I61
+      --WHERE--> I62
+      --opt_where--> I59
+
+I44:
+    sources -> table_ref . , $/COMMA/GROUP/JOIN/ORDER/WHERE
+
+I45:
+    table_ref -> IDENT . , $/COMMA/GROUP/JOIN/ON/ORDER/WHERE
+    table_ref -> IDENT . AS IDENT , $/COMMA/GROUP/JOIN/ON/ORDER/WHERE
+      --AS--> I63
+
+I46:
+    proj_list -> proj_list COMMA proj_item . , COMMA/FROM
+
+I47:
+    proj_item -> expr AS IDENT . , COMMA/FROM
+
+I48:
+    and_expr -> and_expr . AND not_expr , $/AND/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+    expr -> expr OR and_expr . , $/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+      --AND--> I26
+
+I49:
+    and_expr -> and_expr AND not_expr . , $/AND/AS/COMMA/FROM/GROUP/JOIN/OR/ORDER/RPAREN/WHERE
+
+I50:
+    add_expr -> add_expr . MINUS mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    add_expr -> add_expr . PLUS mul_expr , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    cmp_expr -> cmp_expr comparator add_expr . , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/NEQ/OR/ORDER/RPAREN/WHERE
+      --MINUS--> I35
+      --PLUS--> I34
+
+I51:
+    add_expr -> add_expr PLUS mul_expr . , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    mul_expr -> mul_expr . DIV factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> mul_expr . STAR factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+      --DIV--> I37
+      --STAR--> I36
+
+I52:
+    add_expr -> add_expr MINUS mul_expr . , $/AND/AS/COMMA/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/WHERE
+    mul_expr -> mul_expr . DIV factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+    mul_expr -> mul_expr . STAR factor , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+      --DIV--> I37
+      --STAR--> I36
+
+I53:
+    mul_expr -> mul_expr STAR factor . , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+
+I54:
+    mul_expr -> mul_expr DIV factor . , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+
+I55:
+    expr -> expr . OR and_expr , OR/RPAREN
+    func_call -> IDENT LPAREN expr . RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+      --OR--> I25
+      --RPAREN--> I64
+
+I56:
+    func_call -> IDENT LPAREN STAR . RPAREN , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+      --RPAREN--> I65
+
+I57:
+    column_ref -> IDENT DOT IDENT . , $/AND/AS/ASC/COMMA/DESC/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+
+I58:
+    factor -> LPAREN expr RPAREN . , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+
+I59:
+    opt_group -> . , $/ORDER
+    opt_group -> . GROUP BY group_list , $/ORDER
+    query -> SELECT proj FROM sources opt_where . opt_group opt_order , $
+      --GROUP--> I67
+      --opt_group--> I66
+
+I60:
+    sources -> sources COMMA . table_ref , $/COMMA/GROUP/JOIN/ORDER/WHERE
+    table_ref -> . IDENT , $/COMMA/GROUP/JOIN/ORDER/WHERE
+    table_ref -> . IDENT AS IDENT , $/COMMA/GROUP/JOIN/ORDER/WHERE
+      --IDENT--> I45
+      --table_ref--> I68
+
+I61:
+    sources -> sources JOIN . table_ref ON expr , $/COMMA/GROUP/JOIN/ORDER/WHERE
+    table_ref -> . IDENT , ON
+    table_ref -> . IDENT AS IDENT , ON
+      --IDENT--> I45
+      --table_ref--> I69
+
+I62:
+    add_expr -> . add_expr MINUS mul_expr , $/AND/EQ/GEQ/GROUP/GT/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS
+    add_expr -> . add_expr PLUS mul_expr , $/AND/EQ/GEQ/GROUP/GT/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS
+    add_expr -> . mul_expr , $/AND/EQ/GEQ/GROUP/GT/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS
+    and_expr -> . and_expr AND not_expr , $/AND/GROUP/OR/ORDER
+    and_expr -> . not_expr , $/AND/GROUP/OR/ORDER
+    cmp_expr -> . add_expr , $/AND/EQ/GEQ/GROUP/GT/LEQ/LT/NEQ/OR/ORDER
+    cmp_expr -> . cmp_expr comparator add_expr , $/AND/EQ/GEQ/GROUP/GT/LEQ/LT/NEQ/OR/ORDER
+    column_ref -> . IDENT , $/AND/DIV/EQ/GEQ/GROUP/GT/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR
+    column_ref -> . IDENT DOT IDENT , $/AND/DIV/EQ/GEQ/GROUP/GT/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR
+    expr -> . and_expr , $/GROUP/OR/ORDER
+    expr -> . expr OR and_expr , $/GROUP/OR/ORDER
+    factor -> . LPAREN expr RPAREN , $/AND/DIV/EQ/GEQ/GROUP/GT/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR
+    factor -> . NUMBER , $/AND/DIV/EQ/GEQ/GROUP/GT/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR
+    factor -> . STRING , $/AND/DIV/EQ/GEQ/GROUP/GT/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR
+    factor -> . column_ref , $/AND/DIV/EQ/GEQ/GROUP/GT/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR
+    factor -> . func_call , $/AND/DIV/EQ/GEQ/GROUP/GT/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR
+    func_call -> . IDENT LPAREN STAR RPAREN , $/AND/DIV/EQ/GEQ/GROUP/GT/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR
+    func_call -> . IDENT LPAREN expr RPAREN , $/AND/DIV/EQ/GEQ/GROUP/GT/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR
+    mul_expr -> . factor , $/AND/DIV/EQ/GEQ/GROUP/GT/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR
+    mul_expr -> . mul_expr DIV factor , $/AND/DIV/EQ/GEQ/GROUP/GT/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR
+    mul_expr -> . mul_expr STAR factor , $/AND/DIV/EQ/GEQ/GROUP/GT/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR
+    not_expr -> . NOT not_expr , $/AND/GROUP/OR/ORDER
+    not_expr -> . cmp_expr , $/AND/GROUP/OR/ORDER
+    opt_where -> WHERE . expr , $/GROUP/ORDER
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I10
+      --and_expr--> I7
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --expr--> I70
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I8
+
+I63:
+    table_ref -> IDENT AS . IDENT , $/COMMA/GROUP/JOIN/ON/ORDER/WHERE
+      --IDENT--> I71
+
+I64:
+    func_call -> IDENT LPAREN expr RPAREN . , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+
+I65:
+    func_call -> IDENT LPAREN STAR RPAREN . , $/AND/AS/COMMA/DIV/EQ/FROM/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/RPAREN/STAR/WHERE
+
+I66:
+    opt_order -> . , $
+    opt_order -> . ORDER BY order_list , $
+    query -> SELECT proj FROM sources opt_where opt_group . opt_order , $
+      --ORDER--> I73
+      --opt_order--> I72
+
+I67:
+    opt_group -> GROUP . BY group_list , $/ORDER
+      --BY--> I74
+
+I68:
+    sources -> sources COMMA table_ref . , $/COMMA/GROUP/JOIN/ORDER/WHERE
+
+I69:
+    sources -> sources JOIN table_ref . ON expr , $/COMMA/GROUP/JOIN/ORDER/WHERE
+      --ON--> I75
+
+I70:
+    expr -> expr . OR and_expr , $/GROUP/OR/ORDER
+    opt_where -> WHERE expr . , $/GROUP/ORDER
+      --OR--> I25
+
+I71:
+    table_ref -> IDENT AS IDENT . , $/COMMA/GROUP/JOIN/ON/ORDER/WHERE
+
+I72:
+    query -> SELECT proj FROM sources opt_where opt_group opt_order . , $
+
+I73:
+    opt_order -> ORDER . BY order_list , $
+      --BY--> I76
+
+I74:
+    column_ref -> . IDENT , $/COMMA/ORDER
+    column_ref -> . IDENT DOT IDENT , $/COMMA/ORDER
+    group_list -> . column_ref , $/COMMA/ORDER
+    group_list -> . group_list COMMA column_ref , $/COMMA/ORDER
+    opt_group -> GROUP BY . group_list , $/ORDER
+      --IDENT--> I79
+      --column_ref--> I78
+      --group_list--> I77
+
+I75:
+    add_expr -> . add_expr MINUS mul_expr , $/AND/COMMA/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/WHERE
+    add_expr -> . add_expr PLUS mul_expr , $/AND/COMMA/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/WHERE
+    add_expr -> . mul_expr , $/AND/COMMA/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/WHERE
+    and_expr -> . and_expr AND not_expr , $/AND/COMMA/GROUP/JOIN/OR/ORDER/WHERE
+    and_expr -> . not_expr , $/AND/COMMA/GROUP/JOIN/OR/ORDER/WHERE
+    cmp_expr -> . add_expr , $/AND/COMMA/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/NEQ/OR/ORDER/WHERE
+    cmp_expr -> . cmp_expr comparator add_expr , $/AND/COMMA/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/NEQ/OR/ORDER/WHERE
+    column_ref -> . IDENT , $/AND/COMMA/DIV/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR/WHERE
+    column_ref -> . IDENT DOT IDENT , $/AND/COMMA/DIV/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR/WHERE
+    expr -> . and_expr , $/COMMA/GROUP/JOIN/OR/ORDER/WHERE
+    expr -> . expr OR and_expr , $/COMMA/GROUP/JOIN/OR/ORDER/WHERE
+    factor -> . LPAREN expr RPAREN , $/AND/COMMA/DIV/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR/WHERE
+    factor -> . NUMBER , $/AND/COMMA/DIV/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR/WHERE
+    factor -> . STRING , $/AND/COMMA/DIV/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR/WHERE
+    factor -> . column_ref , $/AND/COMMA/DIV/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR/WHERE
+    factor -> . func_call , $/AND/COMMA/DIV/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR/WHERE
+    func_call -> . IDENT LPAREN STAR RPAREN , $/AND/COMMA/DIV/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR/WHERE
+    func_call -> . IDENT LPAREN expr RPAREN , $/AND/COMMA/DIV/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR/WHERE
+    mul_expr -> . factor , $/AND/COMMA/DIV/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR/WHERE
+    mul_expr -> . mul_expr DIV factor , $/AND/COMMA/DIV/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR/WHERE
+    mul_expr -> . mul_expr STAR factor , $/AND/COMMA/DIV/EQ/GEQ/GROUP/GT/JOIN/LEQ/LT/MINUS/NEQ/OR/ORDER/PLUS/STAR/WHERE
+    not_expr -> . NOT not_expr , $/AND/COMMA/GROUP/JOIN/OR/ORDER/WHERE
+    not_expr -> . cmp_expr , $/AND/COMMA/GROUP/JOIN/OR/ORDER/WHERE
+    sources -> sources JOIN table_ref ON . expr , $/COMMA/GROUP/JOIN/ORDER/WHERE
+      --IDENT--> I17
+      --LPAREN--> I21
+      --NOT--> I18
+      --NUMBER--> I19
+      --STRING--> I20
+      --add_expr--> I10
+      --and_expr--> I7
+      --cmp_expr--> I9
+      --column_ref--> I13
+      --expr--> I80
+      --factor--> I12
+      --func_call--> I14
+      --mul_expr--> I11
+      --not_expr--> I8
+
+I76:
+    column_ref -> . IDENT , $/ASC/COMMA/DESC
+    column_ref -> . IDENT DOT IDENT , $/ASC/COMMA/DESC
+    opt_order -> ORDER BY . order_list , $
+    order_item -> . column_ref , $/COMMA
+    order_item -> . column_ref ASC , $/COMMA
+    order_item -> . column_ref DESC , $/COMMA
+    order_list -> . order_item , $/COMMA
+    order_list -> . order_list COMMA order_item , $/COMMA
+      --IDENT--> I79
+      --column_ref--> I83
+      --order_item--> I82
+      --order_list--> I81
+
+I77:
+    group_list -> group_list . COMMA column_ref , $/COMMA/ORDER
+    opt_group -> GROUP BY group_list . , $/ORDER
+      --COMMA--> I84
+
+I78:
+    group_list -> column_ref . , $/COMMA/ORDER
+
+I79:
+    column_ref -> IDENT . , $/ASC/COMMA/DESC/ORDER
+    column_ref -> IDENT . DOT IDENT , $/ASC/COMMA/DESC/ORDER
+      --DOT--> I40
+
+I80:
+    expr -> expr . OR and_expr , $/COMMA/GROUP/JOIN/OR/ORDER/WHERE
+    sources -> sources JOIN table_ref ON expr . , $/COMMA/GROUP/JOIN/ORDER/WHERE
+      --OR--> I25
+
+I81:
+    opt_order -> ORDER BY order_list . , $
+    order_list -> order_list . COMMA order_item , $/COMMA
+      --COMMA--> I85
+
+I82:
+    order_list -> order_item . , $/COMMA
+
+I83:
+    order_item -> column_ref . , $/COMMA
+    order_item -> column_ref . ASC , $/COMMA
+    order_item -> column_ref . DESC , $/COMMA
+      --ASC--> I86
+      --DESC--> I87
+
+I84:
+    column_ref -> . IDENT , $/COMMA/ORDER
+    column_ref -> . IDENT DOT IDENT , $/COMMA/ORDER
+    group_list -> group_list COMMA . column_ref , $/COMMA/ORDER
+      --IDENT--> I79
+      --column_ref--> I88
+
+I85:
+    column_ref -> . IDENT , $/ASC/COMMA/DESC
+    column_ref -> . IDENT DOT IDENT , $/ASC/COMMA/DESC
+    order_item -> . column_ref , $/COMMA
+    order_item -> . column_ref ASC , $/COMMA
+    order_item -> . column_ref DESC , $/COMMA
+    order_list -> order_list COMMA . order_item , $/COMMA
+      --IDENT--> I79
+      --column_ref--> I83
+      --order_item--> I89
+
+I86:
+    order_item -> column_ref ASC . , $/COMMA
+
+I87:
+    order_item -> column_ref DESC . , $/COMMA
+
+I88:
+    group_list -> group_list COMMA column_ref . , $/COMMA/ORDER
+
+I89:
+    order_list -> order_list COMMA order_item . , $/COMMA

@@ -1,0 +1,20 @@
+-- PICO sample program: exercises every statement form
+let x <- 3 + 4 * 2;
+let y <- (x - 1) / 2;
+emit x + y;
+
+when (x > 5 && y <= 10) {
+    emit "big";
+} otherwise {
+    emit "small";
+}
+
+repeat {
+    let x <- x - 1;
+} until (x == 0);
+
+macro add(a, b) {
+    emit a + b;
+}
+
+emit add(x, y);

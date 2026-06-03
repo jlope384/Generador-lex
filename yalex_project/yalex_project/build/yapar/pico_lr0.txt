@@ -1,0 +1,1398 @@
+Autómata LR(0) — pico
+=====================
+
+I0  (inicial):
+    emit_stmt -> . KW_EMIT expr SEMICOLON
+    let_stmt -> . KW_LET IDENT ASSIGN expr SEMICOLON
+    macro_def -> . KW_MACRO IDENT LPAREN RPAREN LBRACE statement_list RBRACE
+    macro_def -> . KW_MACRO IDENT LPAREN param_list RPAREN LBRACE statement_list RBRACE
+    program -> . statement_list
+    program' -> . program
+    repeat_stmt -> . KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL LPAREN expr RPAREN SEMICOLON
+    statement -> . emit_stmt
+    statement -> . let_stmt
+    statement -> . macro_def
+    statement -> . repeat_stmt
+    statement -> . when_stmt
+    statement_list -> . statement
+    statement_list -> . statement_list statement
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+      --KW_EMIT--> I10
+      --KW_LET--> I9
+      --KW_MACRO--> I13
+      --KW_REPEAT--> I12
+      --KW_WHEN--> I11
+      --emit_stmt--> I5
+      --let_stmt--> I4
+      --macro_def--> I8
+      --program--> I1
+      --repeat_stmt--> I7
+      --statement--> I3
+      --statement_list--> I2
+      --when_stmt--> I6
+
+I1:
+    program' -> program .
+
+I2:
+    emit_stmt -> . KW_EMIT expr SEMICOLON
+    let_stmt -> . KW_LET IDENT ASSIGN expr SEMICOLON
+    macro_def -> . KW_MACRO IDENT LPAREN RPAREN LBRACE statement_list RBRACE
+    macro_def -> . KW_MACRO IDENT LPAREN param_list RPAREN LBRACE statement_list RBRACE
+    program -> statement_list .
+    repeat_stmt -> . KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL LPAREN expr RPAREN SEMICOLON
+    statement -> . emit_stmt
+    statement -> . let_stmt
+    statement -> . macro_def
+    statement -> . repeat_stmt
+    statement -> . when_stmt
+    statement_list -> statement_list . statement
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+      --KW_EMIT--> I10
+      --KW_LET--> I9
+      --KW_MACRO--> I13
+      --KW_REPEAT--> I12
+      --KW_WHEN--> I11
+      --emit_stmt--> I5
+      --let_stmt--> I4
+      --macro_def--> I8
+      --repeat_stmt--> I7
+      --statement--> I14
+      --when_stmt--> I6
+
+I3:
+    statement_list -> statement .
+
+I4:
+    statement -> let_stmt .
+
+I5:
+    statement -> emit_stmt .
+
+I6:
+    statement -> when_stmt .
+
+I7:
+    statement -> repeat_stmt .
+
+I8:
+    statement -> macro_def .
+
+I9:
+    let_stmt -> KW_LET . IDENT ASSIGN expr SEMICOLON
+      --IDENT--> I15
+
+I10:
+    emit_stmt -> KW_EMIT . expr SEMICOLON
+    expr -> . expr OR expr_and
+    expr -> . expr_and
+    expr_add -> . expr_add MINUS expr_mul
+    expr_add -> . expr_add PLUS expr_mul
+    expr_add -> . expr_mul
+    expr_and -> . expr_and AND expr_eq
+    expr_and -> . expr_eq
+    expr_cmp -> . expr_add
+    expr_cmp -> . expr_cmp GEQ expr_add
+    expr_cmp -> . expr_cmp GT expr_add
+    expr_cmp -> . expr_cmp LEQ expr_add
+    expr_cmp -> . expr_cmp LT expr_add
+    expr_eq -> . expr_cmp
+    expr_eq -> . expr_eq EQ expr_cmp
+    expr_eq -> . expr_eq NEQ expr_cmp
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr--> I16
+      --expr_add--> I20
+      --expr_and--> I17
+      --expr_cmp--> I19
+      --expr_eq--> I18
+      --expr_mul--> I21
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I11:
+    when_stmt -> KW_WHEN . LPAREN expr RPAREN LBRACE statement_list RBRACE
+    when_stmt -> KW_WHEN . LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+      --LPAREN--> I31
+
+I12:
+    repeat_stmt -> KW_REPEAT . LBRACE statement_list RBRACE KW_UNTIL LPAREN expr RPAREN SEMICOLON
+      --LBRACE--> I32
+
+I13:
+    macro_def -> KW_MACRO . IDENT LPAREN RPAREN LBRACE statement_list RBRACE
+    macro_def -> KW_MACRO . IDENT LPAREN param_list RPAREN LBRACE statement_list RBRACE
+      --IDENT--> I33
+
+I14:
+    statement_list -> statement_list statement .
+
+I15:
+    let_stmt -> KW_LET IDENT . ASSIGN expr SEMICOLON
+      --ASSIGN--> I34
+
+I16:
+    emit_stmt -> KW_EMIT expr . SEMICOLON
+    expr -> expr . OR expr_and
+      --OR--> I36
+      --SEMICOLON--> I35
+
+I17:
+    expr -> expr_and .
+    expr_and -> expr_and . AND expr_eq
+      --AND--> I37
+
+I18:
+    expr_and -> expr_eq .
+    expr_eq -> expr_eq . EQ expr_cmp
+    expr_eq -> expr_eq . NEQ expr_cmp
+      --EQ--> I38
+      --NEQ--> I39
+
+I19:
+    expr_cmp -> expr_cmp . GEQ expr_add
+    expr_cmp -> expr_cmp . GT expr_add
+    expr_cmp -> expr_cmp . LEQ expr_add
+    expr_cmp -> expr_cmp . LT expr_add
+    expr_eq -> expr_cmp .
+      --GEQ--> I43
+      --GT--> I41
+      --LEQ--> I42
+      --LT--> I40
+
+I20:
+    expr_add -> expr_add . MINUS expr_mul
+    expr_add -> expr_add . PLUS expr_mul
+    expr_cmp -> expr_add .
+      --MINUS--> I45
+      --PLUS--> I44
+
+I21:
+    expr_add -> expr_mul .
+    expr_mul -> expr_mul . DIV expr_unary
+    expr_mul -> expr_mul . TIMES expr_unary
+      --DIV--> I47
+      --TIMES--> I46
+
+I22:
+    expr_mul -> expr_unary .
+
+I23:
+    expr_unary -> expr_primary .
+
+I24:
+    expr_primary -> IDENT .
+    expr_primary -> IDENT . LPAREN RPAREN
+    expr_primary -> IDENT . LPAREN arg_list RPAREN
+      --LPAREN--> I48
+
+I25:
+    expr -> . expr OR expr_and
+    expr -> . expr_and
+    expr_add -> . expr_add MINUS expr_mul
+    expr_add -> . expr_add PLUS expr_mul
+    expr_add -> . expr_mul
+    expr_and -> . expr_and AND expr_eq
+    expr_and -> . expr_eq
+    expr_cmp -> . expr_add
+    expr_cmp -> . expr_cmp GEQ expr_add
+    expr_cmp -> . expr_cmp GT expr_add
+    expr_cmp -> . expr_cmp LEQ expr_add
+    expr_cmp -> . expr_cmp LT expr_add
+    expr_eq -> . expr_cmp
+    expr_eq -> . expr_eq EQ expr_cmp
+    expr_eq -> . expr_eq NEQ expr_cmp
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_primary -> LPAREN . expr RPAREN
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr--> I49
+      --expr_add--> I20
+      --expr_and--> I17
+      --expr_cmp--> I19
+      --expr_eq--> I18
+      --expr_mul--> I21
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I26:
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+    expr_unary -> NOT . expr_unary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr_primary--> I23
+      --expr_unary--> I50
+
+I27:
+    expr_primary -> INT_LIT .
+
+I28:
+    expr_primary -> FLOAT_LIT .
+
+I29:
+    expr_primary -> STRING_LIT .
+
+I30:
+    expr_primary -> BOOL_LIT .
+
+I31:
+    expr -> . expr OR expr_and
+    expr -> . expr_and
+    expr_add -> . expr_add MINUS expr_mul
+    expr_add -> . expr_add PLUS expr_mul
+    expr_add -> . expr_mul
+    expr_and -> . expr_and AND expr_eq
+    expr_and -> . expr_eq
+    expr_cmp -> . expr_add
+    expr_cmp -> . expr_cmp GEQ expr_add
+    expr_cmp -> . expr_cmp GT expr_add
+    expr_cmp -> . expr_cmp LEQ expr_add
+    expr_cmp -> . expr_cmp LT expr_add
+    expr_eq -> . expr_cmp
+    expr_eq -> . expr_eq EQ expr_cmp
+    expr_eq -> . expr_eq NEQ expr_cmp
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+    when_stmt -> KW_WHEN LPAREN . expr RPAREN LBRACE statement_list RBRACE
+    when_stmt -> KW_WHEN LPAREN . expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr--> I51
+      --expr_add--> I20
+      --expr_and--> I17
+      --expr_cmp--> I19
+      --expr_eq--> I18
+      --expr_mul--> I21
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I32:
+    emit_stmt -> . KW_EMIT expr SEMICOLON
+    let_stmt -> . KW_LET IDENT ASSIGN expr SEMICOLON
+    macro_def -> . KW_MACRO IDENT LPAREN RPAREN LBRACE statement_list RBRACE
+    macro_def -> . KW_MACRO IDENT LPAREN param_list RPAREN LBRACE statement_list RBRACE
+    repeat_stmt -> . KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL LPAREN expr RPAREN SEMICOLON
+    repeat_stmt -> KW_REPEAT LBRACE . statement_list RBRACE KW_UNTIL LPAREN expr RPAREN SEMICOLON
+    statement -> . emit_stmt
+    statement -> . let_stmt
+    statement -> . macro_def
+    statement -> . repeat_stmt
+    statement -> . when_stmt
+    statement_list -> . statement
+    statement_list -> . statement_list statement
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+      --KW_EMIT--> I10
+      --KW_LET--> I9
+      --KW_MACRO--> I13
+      --KW_REPEAT--> I12
+      --KW_WHEN--> I11
+      --emit_stmt--> I5
+      --let_stmt--> I4
+      --macro_def--> I8
+      --repeat_stmt--> I7
+      --statement--> I3
+      --statement_list--> I52
+      --when_stmt--> I6
+
+I33:
+    macro_def -> KW_MACRO IDENT . LPAREN RPAREN LBRACE statement_list RBRACE
+    macro_def -> KW_MACRO IDENT . LPAREN param_list RPAREN LBRACE statement_list RBRACE
+      --LPAREN--> I53
+
+I34:
+    expr -> . expr OR expr_and
+    expr -> . expr_and
+    expr_add -> . expr_add MINUS expr_mul
+    expr_add -> . expr_add PLUS expr_mul
+    expr_add -> . expr_mul
+    expr_and -> . expr_and AND expr_eq
+    expr_and -> . expr_eq
+    expr_cmp -> . expr_add
+    expr_cmp -> . expr_cmp GEQ expr_add
+    expr_cmp -> . expr_cmp GT expr_add
+    expr_cmp -> . expr_cmp LEQ expr_add
+    expr_cmp -> . expr_cmp LT expr_add
+    expr_eq -> . expr_cmp
+    expr_eq -> . expr_eq EQ expr_cmp
+    expr_eq -> . expr_eq NEQ expr_cmp
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+    let_stmt -> KW_LET IDENT ASSIGN . expr SEMICOLON
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr--> I54
+      --expr_add--> I20
+      --expr_and--> I17
+      --expr_cmp--> I19
+      --expr_eq--> I18
+      --expr_mul--> I21
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I35:
+    emit_stmt -> KW_EMIT expr SEMICOLON .
+
+I36:
+    expr -> expr OR . expr_and
+    expr_add -> . expr_add MINUS expr_mul
+    expr_add -> . expr_add PLUS expr_mul
+    expr_add -> . expr_mul
+    expr_and -> . expr_and AND expr_eq
+    expr_and -> . expr_eq
+    expr_cmp -> . expr_add
+    expr_cmp -> . expr_cmp GEQ expr_add
+    expr_cmp -> . expr_cmp GT expr_add
+    expr_cmp -> . expr_cmp LEQ expr_add
+    expr_cmp -> . expr_cmp LT expr_add
+    expr_eq -> . expr_cmp
+    expr_eq -> . expr_eq EQ expr_cmp
+    expr_eq -> . expr_eq NEQ expr_cmp
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr_add--> I20
+      --expr_and--> I55
+      --expr_cmp--> I19
+      --expr_eq--> I18
+      --expr_mul--> I21
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I37:
+    expr_add -> . expr_add MINUS expr_mul
+    expr_add -> . expr_add PLUS expr_mul
+    expr_add -> . expr_mul
+    expr_and -> expr_and AND . expr_eq
+    expr_cmp -> . expr_add
+    expr_cmp -> . expr_cmp GEQ expr_add
+    expr_cmp -> . expr_cmp GT expr_add
+    expr_cmp -> . expr_cmp LEQ expr_add
+    expr_cmp -> . expr_cmp LT expr_add
+    expr_eq -> . expr_cmp
+    expr_eq -> . expr_eq EQ expr_cmp
+    expr_eq -> . expr_eq NEQ expr_cmp
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr_add--> I20
+      --expr_cmp--> I19
+      --expr_eq--> I56
+      --expr_mul--> I21
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I38:
+    expr_add -> . expr_add MINUS expr_mul
+    expr_add -> . expr_add PLUS expr_mul
+    expr_add -> . expr_mul
+    expr_cmp -> . expr_add
+    expr_cmp -> . expr_cmp GEQ expr_add
+    expr_cmp -> . expr_cmp GT expr_add
+    expr_cmp -> . expr_cmp LEQ expr_add
+    expr_cmp -> . expr_cmp LT expr_add
+    expr_eq -> expr_eq EQ . expr_cmp
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr_add--> I20
+      --expr_cmp--> I57
+      --expr_mul--> I21
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I39:
+    expr_add -> . expr_add MINUS expr_mul
+    expr_add -> . expr_add PLUS expr_mul
+    expr_add -> . expr_mul
+    expr_cmp -> . expr_add
+    expr_cmp -> . expr_cmp GEQ expr_add
+    expr_cmp -> . expr_cmp GT expr_add
+    expr_cmp -> . expr_cmp LEQ expr_add
+    expr_cmp -> . expr_cmp LT expr_add
+    expr_eq -> expr_eq NEQ . expr_cmp
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr_add--> I20
+      --expr_cmp--> I58
+      --expr_mul--> I21
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I40:
+    expr_add -> . expr_add MINUS expr_mul
+    expr_add -> . expr_add PLUS expr_mul
+    expr_add -> . expr_mul
+    expr_cmp -> expr_cmp LT . expr_add
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr_add--> I59
+      --expr_mul--> I21
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I41:
+    expr_add -> . expr_add MINUS expr_mul
+    expr_add -> . expr_add PLUS expr_mul
+    expr_add -> . expr_mul
+    expr_cmp -> expr_cmp GT . expr_add
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr_add--> I60
+      --expr_mul--> I21
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I42:
+    expr_add -> . expr_add MINUS expr_mul
+    expr_add -> . expr_add PLUS expr_mul
+    expr_add -> . expr_mul
+    expr_cmp -> expr_cmp LEQ . expr_add
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr_add--> I61
+      --expr_mul--> I21
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I43:
+    expr_add -> . expr_add MINUS expr_mul
+    expr_add -> . expr_add PLUS expr_mul
+    expr_add -> . expr_mul
+    expr_cmp -> expr_cmp GEQ . expr_add
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr_add--> I62
+      --expr_mul--> I21
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I44:
+    expr_add -> expr_add PLUS . expr_mul
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr_mul--> I63
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I45:
+    expr_add -> expr_add MINUS . expr_mul
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr_mul--> I64
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I46:
+    expr_mul -> expr_mul TIMES . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr_primary--> I23
+      --expr_unary--> I65
+
+I47:
+    expr_mul -> expr_mul DIV . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr_primary--> I23
+      --expr_unary--> I66
+
+I48:
+    arg_list -> . arg_list COMMA expr
+    arg_list -> . expr
+    expr -> . expr OR expr_and
+    expr -> . expr_and
+    expr_add -> . expr_add MINUS expr_mul
+    expr_add -> . expr_add PLUS expr_mul
+    expr_add -> . expr_mul
+    expr_and -> . expr_and AND expr_eq
+    expr_and -> . expr_eq
+    expr_cmp -> . expr_add
+    expr_cmp -> . expr_cmp GEQ expr_add
+    expr_cmp -> . expr_cmp GT expr_add
+    expr_cmp -> . expr_cmp LEQ expr_add
+    expr_cmp -> . expr_cmp LT expr_add
+    expr_eq -> . expr_cmp
+    expr_eq -> . expr_eq EQ expr_cmp
+    expr_eq -> . expr_eq NEQ expr_cmp
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_primary -> IDENT LPAREN . RPAREN
+    expr_primary -> IDENT LPAREN . arg_list RPAREN
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --RPAREN--> I69
+      --STRING_LIT--> I29
+      --arg_list--> I68
+      --expr--> I67
+      --expr_add--> I20
+      --expr_and--> I17
+      --expr_cmp--> I19
+      --expr_eq--> I18
+      --expr_mul--> I21
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I49:
+    expr -> expr . OR expr_and
+    expr_primary -> LPAREN expr . RPAREN
+      --OR--> I36
+      --RPAREN--> I70
+
+I50:
+    expr_unary -> NOT expr_unary .
+
+I51:
+    expr -> expr . OR expr_and
+    when_stmt -> KW_WHEN LPAREN expr . RPAREN LBRACE statement_list RBRACE
+    when_stmt -> KW_WHEN LPAREN expr . RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+      --OR--> I36
+      --RPAREN--> I71
+
+I52:
+    emit_stmt -> . KW_EMIT expr SEMICOLON
+    let_stmt -> . KW_LET IDENT ASSIGN expr SEMICOLON
+    macro_def -> . KW_MACRO IDENT LPAREN RPAREN LBRACE statement_list RBRACE
+    macro_def -> . KW_MACRO IDENT LPAREN param_list RPAREN LBRACE statement_list RBRACE
+    repeat_stmt -> . KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL LPAREN expr RPAREN SEMICOLON
+    repeat_stmt -> KW_REPEAT LBRACE statement_list . RBRACE KW_UNTIL LPAREN expr RPAREN SEMICOLON
+    statement -> . emit_stmt
+    statement -> . let_stmt
+    statement -> . macro_def
+    statement -> . repeat_stmt
+    statement -> . when_stmt
+    statement_list -> statement_list . statement
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+      --KW_EMIT--> I10
+      --KW_LET--> I9
+      --KW_MACRO--> I13
+      --KW_REPEAT--> I12
+      --KW_WHEN--> I11
+      --RBRACE--> I72
+      --emit_stmt--> I5
+      --let_stmt--> I4
+      --macro_def--> I8
+      --repeat_stmt--> I7
+      --statement--> I14
+      --when_stmt--> I6
+
+I53:
+    macro_def -> KW_MACRO IDENT LPAREN . RPAREN LBRACE statement_list RBRACE
+    macro_def -> KW_MACRO IDENT LPAREN . param_list RPAREN LBRACE statement_list RBRACE
+    param_list -> . IDENT
+    param_list -> . param_list COMMA IDENT
+      --IDENT--> I74
+      --RPAREN--> I75
+      --param_list--> I73
+
+I54:
+    expr -> expr . OR expr_and
+    let_stmt -> KW_LET IDENT ASSIGN expr . SEMICOLON
+      --OR--> I36
+      --SEMICOLON--> I76
+
+I55:
+    expr -> expr OR expr_and .
+    expr_and -> expr_and . AND expr_eq
+      --AND--> I37
+
+I56:
+    expr_and -> expr_and AND expr_eq .
+    expr_eq -> expr_eq . EQ expr_cmp
+    expr_eq -> expr_eq . NEQ expr_cmp
+      --EQ--> I38
+      --NEQ--> I39
+
+I57:
+    expr_cmp -> expr_cmp . GEQ expr_add
+    expr_cmp -> expr_cmp . GT expr_add
+    expr_cmp -> expr_cmp . LEQ expr_add
+    expr_cmp -> expr_cmp . LT expr_add
+    expr_eq -> expr_eq EQ expr_cmp .
+      --GEQ--> I43
+      --GT--> I41
+      --LEQ--> I42
+      --LT--> I40
+
+I58:
+    expr_cmp -> expr_cmp . GEQ expr_add
+    expr_cmp -> expr_cmp . GT expr_add
+    expr_cmp -> expr_cmp . LEQ expr_add
+    expr_cmp -> expr_cmp . LT expr_add
+    expr_eq -> expr_eq NEQ expr_cmp .
+      --GEQ--> I43
+      --GT--> I41
+      --LEQ--> I42
+      --LT--> I40
+
+I59:
+    expr_add -> expr_add . MINUS expr_mul
+    expr_add -> expr_add . PLUS expr_mul
+    expr_cmp -> expr_cmp LT expr_add .
+      --MINUS--> I45
+      --PLUS--> I44
+
+I60:
+    expr_add -> expr_add . MINUS expr_mul
+    expr_add -> expr_add . PLUS expr_mul
+    expr_cmp -> expr_cmp GT expr_add .
+      --MINUS--> I45
+      --PLUS--> I44
+
+I61:
+    expr_add -> expr_add . MINUS expr_mul
+    expr_add -> expr_add . PLUS expr_mul
+    expr_cmp -> expr_cmp LEQ expr_add .
+      --MINUS--> I45
+      --PLUS--> I44
+
+I62:
+    expr_add -> expr_add . MINUS expr_mul
+    expr_add -> expr_add . PLUS expr_mul
+    expr_cmp -> expr_cmp GEQ expr_add .
+      --MINUS--> I45
+      --PLUS--> I44
+
+I63:
+    expr_add -> expr_add PLUS expr_mul .
+    expr_mul -> expr_mul . DIV expr_unary
+    expr_mul -> expr_mul . TIMES expr_unary
+      --DIV--> I47
+      --TIMES--> I46
+
+I64:
+    expr_add -> expr_add MINUS expr_mul .
+    expr_mul -> expr_mul . DIV expr_unary
+    expr_mul -> expr_mul . TIMES expr_unary
+      --DIV--> I47
+      --TIMES--> I46
+
+I65:
+    expr_mul -> expr_mul TIMES expr_unary .
+
+I66:
+    expr_mul -> expr_mul DIV expr_unary .
+
+I67:
+    arg_list -> expr .
+    expr -> expr . OR expr_and
+      --OR--> I36
+
+I68:
+    arg_list -> arg_list . COMMA expr
+    expr_primary -> IDENT LPAREN arg_list . RPAREN
+      --COMMA--> I78
+      --RPAREN--> I77
+
+I69:
+    expr_primary -> IDENT LPAREN RPAREN .
+
+I70:
+    expr_primary -> LPAREN expr RPAREN .
+
+I71:
+    when_stmt -> KW_WHEN LPAREN expr RPAREN . LBRACE statement_list RBRACE
+    when_stmt -> KW_WHEN LPAREN expr RPAREN . LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+      --LBRACE--> I79
+
+I72:
+    repeat_stmt -> KW_REPEAT LBRACE statement_list RBRACE . KW_UNTIL LPAREN expr RPAREN SEMICOLON
+      --KW_UNTIL--> I80
+
+I73:
+    macro_def -> KW_MACRO IDENT LPAREN param_list . RPAREN LBRACE statement_list RBRACE
+    param_list -> param_list . COMMA IDENT
+      --COMMA--> I82
+      --RPAREN--> I81
+
+I74:
+    param_list -> IDENT .
+
+I75:
+    macro_def -> KW_MACRO IDENT LPAREN RPAREN . LBRACE statement_list RBRACE
+      --LBRACE--> I83
+
+I76:
+    let_stmt -> KW_LET IDENT ASSIGN expr SEMICOLON .
+
+I77:
+    expr_primary -> IDENT LPAREN arg_list RPAREN .
+
+I78:
+    arg_list -> arg_list COMMA . expr
+    expr -> . expr OR expr_and
+    expr -> . expr_and
+    expr_add -> . expr_add MINUS expr_mul
+    expr_add -> . expr_add PLUS expr_mul
+    expr_add -> . expr_mul
+    expr_and -> . expr_and AND expr_eq
+    expr_and -> . expr_eq
+    expr_cmp -> . expr_add
+    expr_cmp -> . expr_cmp GEQ expr_add
+    expr_cmp -> . expr_cmp GT expr_add
+    expr_cmp -> . expr_cmp LEQ expr_add
+    expr_cmp -> . expr_cmp LT expr_add
+    expr_eq -> . expr_cmp
+    expr_eq -> . expr_eq EQ expr_cmp
+    expr_eq -> . expr_eq NEQ expr_cmp
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr--> I84
+      --expr_add--> I20
+      --expr_and--> I17
+      --expr_cmp--> I19
+      --expr_eq--> I18
+      --expr_mul--> I21
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I79:
+    emit_stmt -> . KW_EMIT expr SEMICOLON
+    let_stmt -> . KW_LET IDENT ASSIGN expr SEMICOLON
+    macro_def -> . KW_MACRO IDENT LPAREN RPAREN LBRACE statement_list RBRACE
+    macro_def -> . KW_MACRO IDENT LPAREN param_list RPAREN LBRACE statement_list RBRACE
+    repeat_stmt -> . KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL LPAREN expr RPAREN SEMICOLON
+    statement -> . emit_stmt
+    statement -> . let_stmt
+    statement -> . macro_def
+    statement -> . repeat_stmt
+    statement -> . when_stmt
+    statement_list -> . statement
+    statement_list -> . statement_list statement
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+    when_stmt -> KW_WHEN LPAREN expr RPAREN LBRACE . statement_list RBRACE
+    when_stmt -> KW_WHEN LPAREN expr RPAREN LBRACE . statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+      --KW_EMIT--> I10
+      --KW_LET--> I9
+      --KW_MACRO--> I13
+      --KW_REPEAT--> I12
+      --KW_WHEN--> I11
+      --emit_stmt--> I5
+      --let_stmt--> I4
+      --macro_def--> I8
+      --repeat_stmt--> I7
+      --statement--> I3
+      --statement_list--> I85
+      --when_stmt--> I6
+
+I80:
+    repeat_stmt -> KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL . LPAREN expr RPAREN SEMICOLON
+      --LPAREN--> I86
+
+I81:
+    macro_def -> KW_MACRO IDENT LPAREN param_list RPAREN . LBRACE statement_list RBRACE
+      --LBRACE--> I87
+
+I82:
+    param_list -> param_list COMMA . IDENT
+      --IDENT--> I88
+
+I83:
+    emit_stmt -> . KW_EMIT expr SEMICOLON
+    let_stmt -> . KW_LET IDENT ASSIGN expr SEMICOLON
+    macro_def -> . KW_MACRO IDENT LPAREN RPAREN LBRACE statement_list RBRACE
+    macro_def -> . KW_MACRO IDENT LPAREN param_list RPAREN LBRACE statement_list RBRACE
+    macro_def -> KW_MACRO IDENT LPAREN RPAREN LBRACE . statement_list RBRACE
+    repeat_stmt -> . KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL LPAREN expr RPAREN SEMICOLON
+    statement -> . emit_stmt
+    statement -> . let_stmt
+    statement -> . macro_def
+    statement -> . repeat_stmt
+    statement -> . when_stmt
+    statement_list -> . statement
+    statement_list -> . statement_list statement
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+      --KW_EMIT--> I10
+      --KW_LET--> I9
+      --KW_MACRO--> I13
+      --KW_REPEAT--> I12
+      --KW_WHEN--> I11
+      --emit_stmt--> I5
+      --let_stmt--> I4
+      --macro_def--> I8
+      --repeat_stmt--> I7
+      --statement--> I3
+      --statement_list--> I89
+      --when_stmt--> I6
+
+I84:
+    arg_list -> arg_list COMMA expr .
+    expr -> expr . OR expr_and
+      --OR--> I36
+
+I85:
+    emit_stmt -> . KW_EMIT expr SEMICOLON
+    let_stmt -> . KW_LET IDENT ASSIGN expr SEMICOLON
+    macro_def -> . KW_MACRO IDENT LPAREN RPAREN LBRACE statement_list RBRACE
+    macro_def -> . KW_MACRO IDENT LPAREN param_list RPAREN LBRACE statement_list RBRACE
+    repeat_stmt -> . KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL LPAREN expr RPAREN SEMICOLON
+    statement -> . emit_stmt
+    statement -> . let_stmt
+    statement -> . macro_def
+    statement -> . repeat_stmt
+    statement -> . when_stmt
+    statement_list -> statement_list . statement
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+    when_stmt -> KW_WHEN LPAREN expr RPAREN LBRACE statement_list . RBRACE
+    when_stmt -> KW_WHEN LPAREN expr RPAREN LBRACE statement_list . RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+      --KW_EMIT--> I10
+      --KW_LET--> I9
+      --KW_MACRO--> I13
+      --KW_REPEAT--> I12
+      --KW_WHEN--> I11
+      --RBRACE--> I90
+      --emit_stmt--> I5
+      --let_stmt--> I4
+      --macro_def--> I8
+      --repeat_stmt--> I7
+      --statement--> I14
+      --when_stmt--> I6
+
+I86:
+    expr -> . expr OR expr_and
+    expr -> . expr_and
+    expr_add -> . expr_add MINUS expr_mul
+    expr_add -> . expr_add PLUS expr_mul
+    expr_add -> . expr_mul
+    expr_and -> . expr_and AND expr_eq
+    expr_and -> . expr_eq
+    expr_cmp -> . expr_add
+    expr_cmp -> . expr_cmp GEQ expr_add
+    expr_cmp -> . expr_cmp GT expr_add
+    expr_cmp -> . expr_cmp LEQ expr_add
+    expr_cmp -> . expr_cmp LT expr_add
+    expr_eq -> . expr_cmp
+    expr_eq -> . expr_eq EQ expr_cmp
+    expr_eq -> . expr_eq NEQ expr_cmp
+    expr_mul -> . expr_mul DIV expr_unary
+    expr_mul -> . expr_mul TIMES expr_unary
+    expr_mul -> . expr_unary
+    expr_primary -> . BOOL_LIT
+    expr_primary -> . FLOAT_LIT
+    expr_primary -> . IDENT
+    expr_primary -> . IDENT LPAREN RPAREN
+    expr_primary -> . IDENT LPAREN arg_list RPAREN
+    expr_primary -> . INT_LIT
+    expr_primary -> . LPAREN expr RPAREN
+    expr_primary -> . STRING_LIT
+    expr_unary -> . NOT expr_unary
+    expr_unary -> . expr_primary
+    repeat_stmt -> KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL LPAREN . expr RPAREN SEMICOLON
+      --BOOL_LIT--> I30
+      --FLOAT_LIT--> I28
+      --IDENT--> I24
+      --INT_LIT--> I27
+      --LPAREN--> I25
+      --NOT--> I26
+      --STRING_LIT--> I29
+      --expr--> I91
+      --expr_add--> I20
+      --expr_and--> I17
+      --expr_cmp--> I19
+      --expr_eq--> I18
+      --expr_mul--> I21
+      --expr_primary--> I23
+      --expr_unary--> I22
+
+I87:
+    emit_stmt -> . KW_EMIT expr SEMICOLON
+    let_stmt -> . KW_LET IDENT ASSIGN expr SEMICOLON
+    macro_def -> . KW_MACRO IDENT LPAREN RPAREN LBRACE statement_list RBRACE
+    macro_def -> . KW_MACRO IDENT LPAREN param_list RPAREN LBRACE statement_list RBRACE
+    macro_def -> KW_MACRO IDENT LPAREN param_list RPAREN LBRACE . statement_list RBRACE
+    repeat_stmt -> . KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL LPAREN expr RPAREN SEMICOLON
+    statement -> . emit_stmt
+    statement -> . let_stmt
+    statement -> . macro_def
+    statement -> . repeat_stmt
+    statement -> . when_stmt
+    statement_list -> . statement
+    statement_list -> . statement_list statement
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+      --KW_EMIT--> I10
+      --KW_LET--> I9
+      --KW_MACRO--> I13
+      --KW_REPEAT--> I12
+      --KW_WHEN--> I11
+      --emit_stmt--> I5
+      --let_stmt--> I4
+      --macro_def--> I8
+      --repeat_stmt--> I7
+      --statement--> I3
+      --statement_list--> I92
+      --when_stmt--> I6
+
+I88:
+    param_list -> param_list COMMA IDENT .
+
+I89:
+    emit_stmt -> . KW_EMIT expr SEMICOLON
+    let_stmt -> . KW_LET IDENT ASSIGN expr SEMICOLON
+    macro_def -> . KW_MACRO IDENT LPAREN RPAREN LBRACE statement_list RBRACE
+    macro_def -> . KW_MACRO IDENT LPAREN param_list RPAREN LBRACE statement_list RBRACE
+    macro_def -> KW_MACRO IDENT LPAREN RPAREN LBRACE statement_list . RBRACE
+    repeat_stmt -> . KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL LPAREN expr RPAREN SEMICOLON
+    statement -> . emit_stmt
+    statement -> . let_stmt
+    statement -> . macro_def
+    statement -> . repeat_stmt
+    statement -> . when_stmt
+    statement_list -> statement_list . statement
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+      --KW_EMIT--> I10
+      --KW_LET--> I9
+      --KW_MACRO--> I13
+      --KW_REPEAT--> I12
+      --KW_WHEN--> I11
+      --RBRACE--> I93
+      --emit_stmt--> I5
+      --let_stmt--> I4
+      --macro_def--> I8
+      --repeat_stmt--> I7
+      --statement--> I14
+      --when_stmt--> I6
+
+I90:
+    when_stmt -> KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE .
+    when_stmt -> KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE . KW_OTHERWISE LBRACE statement_list RBRACE
+      --KW_OTHERWISE--> I94
+
+I91:
+    expr -> expr . OR expr_and
+    repeat_stmt -> KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL LPAREN expr . RPAREN SEMICOLON
+      --OR--> I36
+      --RPAREN--> I95
+
+I92:
+    emit_stmt -> . KW_EMIT expr SEMICOLON
+    let_stmt -> . KW_LET IDENT ASSIGN expr SEMICOLON
+    macro_def -> . KW_MACRO IDENT LPAREN RPAREN LBRACE statement_list RBRACE
+    macro_def -> . KW_MACRO IDENT LPAREN param_list RPAREN LBRACE statement_list RBRACE
+    macro_def -> KW_MACRO IDENT LPAREN param_list RPAREN LBRACE statement_list . RBRACE
+    repeat_stmt -> . KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL LPAREN expr RPAREN SEMICOLON
+    statement -> . emit_stmt
+    statement -> . let_stmt
+    statement -> . macro_def
+    statement -> . repeat_stmt
+    statement -> . when_stmt
+    statement_list -> statement_list . statement
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+      --KW_EMIT--> I10
+      --KW_LET--> I9
+      --KW_MACRO--> I13
+      --KW_REPEAT--> I12
+      --KW_WHEN--> I11
+      --RBRACE--> I96
+      --emit_stmt--> I5
+      --let_stmt--> I4
+      --macro_def--> I8
+      --repeat_stmt--> I7
+      --statement--> I14
+      --when_stmt--> I6
+
+I93:
+    macro_def -> KW_MACRO IDENT LPAREN RPAREN LBRACE statement_list RBRACE .
+
+I94:
+    when_stmt -> KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE . LBRACE statement_list RBRACE
+      --LBRACE--> I97
+
+I95:
+    repeat_stmt -> KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL LPAREN expr RPAREN . SEMICOLON
+      --SEMICOLON--> I98
+
+I96:
+    macro_def -> KW_MACRO IDENT LPAREN param_list RPAREN LBRACE statement_list RBRACE .
+
+I97:
+    emit_stmt -> . KW_EMIT expr SEMICOLON
+    let_stmt -> . KW_LET IDENT ASSIGN expr SEMICOLON
+    macro_def -> . KW_MACRO IDENT LPAREN RPAREN LBRACE statement_list RBRACE
+    macro_def -> . KW_MACRO IDENT LPAREN param_list RPAREN LBRACE statement_list RBRACE
+    repeat_stmt -> . KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL LPAREN expr RPAREN SEMICOLON
+    statement -> . emit_stmt
+    statement -> . let_stmt
+    statement -> . macro_def
+    statement -> . repeat_stmt
+    statement -> . when_stmt
+    statement_list -> . statement
+    statement_list -> . statement_list statement
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+    when_stmt -> KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE . statement_list RBRACE
+      --KW_EMIT--> I10
+      --KW_LET--> I9
+      --KW_MACRO--> I13
+      --KW_REPEAT--> I12
+      --KW_WHEN--> I11
+      --emit_stmt--> I5
+      --let_stmt--> I4
+      --macro_def--> I8
+      --repeat_stmt--> I7
+      --statement--> I3
+      --statement_list--> I99
+      --when_stmt--> I6
+
+I98:
+    repeat_stmt -> KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL LPAREN expr RPAREN SEMICOLON .
+
+I99:
+    emit_stmt -> . KW_EMIT expr SEMICOLON
+    let_stmt -> . KW_LET IDENT ASSIGN expr SEMICOLON
+    macro_def -> . KW_MACRO IDENT LPAREN RPAREN LBRACE statement_list RBRACE
+    macro_def -> . KW_MACRO IDENT LPAREN param_list RPAREN LBRACE statement_list RBRACE
+    repeat_stmt -> . KW_REPEAT LBRACE statement_list RBRACE KW_UNTIL LPAREN expr RPAREN SEMICOLON
+    statement -> . emit_stmt
+    statement -> . let_stmt
+    statement -> . macro_def
+    statement -> . repeat_stmt
+    statement -> . when_stmt
+    statement_list -> statement_list . statement
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE
+    when_stmt -> . KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE
+    when_stmt -> KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list . RBRACE
+      --KW_EMIT--> I10
+      --KW_LET--> I9
+      --KW_MACRO--> I13
+      --KW_REPEAT--> I12
+      --KW_WHEN--> I11
+      --RBRACE--> I100
+      --emit_stmt--> I5
+      --let_stmt--> I4
+      --macro_def--> I8
+      --repeat_stmt--> I7
+      --statement--> I14
+      --when_stmt--> I6
+
+I100:
+    when_stmt -> KW_WHEN LPAREN expr RPAREN LBRACE statement_list RBRACE KW_OTHERWISE LBRACE statement_list RBRACE .

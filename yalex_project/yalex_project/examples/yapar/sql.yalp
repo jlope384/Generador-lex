@@ -1,0 +1,159 @@
+/* sql.yalp — YAPar specification for a SELECT subset of SQL.              */
+/* Dominio MUY distinto a PICO (lenguaje imperativo): aqui modelamos un    */
+/* lenguaje DECLARATIVO de consultas a base de datos.  Misma complejidad:  */
+/* clausulas SELECT/FROM/WHERE/JOIN/GROUP BY/ORDER BY, alias con AS,        */
+/* referencias calificadas tabla.columna, funciones de agregacion y una    */
+/* jerarquia de precedencia de expresiones (OR > AND > NOT > comparacion   */
+/* > suma > multiplicacion > primario).                                    */
+
+/* ── Token declarations ── */
+%token SELECT FROM WHERE JOIN ON
+%token GROUP ORDER BY ASC DESC AS DISTINCT
+%token AND OR NOT
+%token EQ NEQ LT GT LEQ GEQ
+%token PLUS MINUS STAR DIV
+%token COMMA DOT LPAREN RPAREN
+%token IDENT NUMBER STRING
+
+%token WS
+IGNORE WS
+
+%%
+
+/* Una consulta: SELECT ... FROM ... [WHERE] [GROUP BY] [ORDER BY] */
+query:
+    SELECT proj FROM sources opt_where opt_group opt_order
+;
+
+/* Lista de proyeccion: *, columnas, o DISTINCT columnas */
+proj:
+    STAR
+  | proj_list
+  | DISTINCT proj_list
+;
+
+proj_list:
+    proj_item
+  | proj_list COMMA proj_item
+;
+
+/* Cada item puede llevar alias: expr AS nombre */
+proj_item:
+    expr
+  | expr AS IDENT
+;
+
+/* Origen de datos: tablas separadas por coma o unidas con JOIN ... ON */
+sources:
+    table_ref
+  | sources COMMA table_ref
+  | sources JOIN table_ref ON expr
+;
+
+table_ref:
+    IDENT
+  | IDENT AS IDENT
+;
+
+/* Clausulas opcionales (producciones epsilon). Cada una empieza con una   */
+/* palabra clave unica, asi que no chocan con la alternativa vacia.        */
+opt_where:
+    WHERE expr
+  |
+;
+
+opt_group:
+    GROUP BY group_list
+  |
+;
+
+opt_order:
+    ORDER BY order_list
+  |
+;
+
+group_list:
+    column_ref
+  | group_list COMMA column_ref
+;
+
+order_list:
+    order_item
+  | order_list COMMA order_item
+;
+
+order_item:
+    column_ref
+  | column_ref ASC
+  | column_ref DESC
+;
+
+/* ── Expresiones (una sola jerarquia de precedencia) ── */
+
+/* Nivel 1 — OR logico */
+expr:
+    expr OR and_expr
+  | and_expr
+;
+
+/* Nivel 2 — AND logico */
+and_expr:
+    and_expr AND not_expr
+  | not_expr
+;
+
+/* Nivel 3 — NOT unario */
+not_expr:
+    NOT not_expr
+  | cmp_expr
+;
+
+/* Nivel 4 — comparaciones */
+cmp_expr:
+    cmp_expr comparator add_expr
+  | add_expr
+;
+
+comparator:
+    EQ
+  | NEQ
+  | LT
+  | GT
+  | LEQ
+  | GEQ
+;
+
+/* Nivel 5 — suma y resta */
+add_expr:
+    add_expr PLUS mul_expr
+  | add_expr MINUS mul_expr
+  | mul_expr
+;
+
+/* Nivel 6 — multiplicacion y division */
+mul_expr:
+    mul_expr STAR factor
+  | mul_expr DIV factor
+  | factor
+;
+
+/* Nivel 7 — primario: literales, columnas, funciones, agrupacion */
+factor:
+    NUMBER
+  | STRING
+  | column_ref
+  | func_call
+  | LPAREN expr RPAREN
+;
+
+/* Referencia a columna: nombre o tabla.columna */
+column_ref:
+    IDENT
+  | IDENT DOT IDENT
+;
+
+/* Llamada a funcion de agregacion: f(expr) o COUNT(*) */
+func_call:
+    IDENT LPAREN expr RPAREN
+  | IDENT LPAREN STAR RPAREN
+;

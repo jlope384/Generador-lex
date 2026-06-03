@@ -1,0 +1,5 @@
+macro add(a, b) {
+    let result <- a + b;
+    emit result;
+}
+emit add(3, 4);

@@ -1,0 +1,5 @@
+let count <- 5;
+repeat {
+    emit count;
+    let count <- count - 1;
+} until (count == 0);

@@ -1,0 +1,65 @@
+(* sql.yal — YALex specification for the SQL SELECT subset (sql.yalp).      *)
+(* Empareja con sql.yalp: emite exactamente esos %token.                    *)
+(* Palabras clave en MAYUSCULAS (SELECT, FROM, ...); identificadores en     *)
+(* minusculas/mixto.  Cadenas entre comillas dobles.  -- comentario de linea*)
+(* Espacios y comentarios se emiten como WS y la gramatica los IGNORE.      *)
+
+{
+# Generated lexer for the SQL SELECT subset
+}
+
+let digit      = ['0'-'9']
+let letter     = ['a'-'z' 'A'-'Z']
+let alphanum   = letter | digit | '_'
+
+let ident      = letter alphanum*
+let number     = digit+ | digit+ '.' digit+
+
+let str_char   = [^ '"' '\n' '\\'] | '\\' _
+let string_lit = '"' str_char* '"'
+
+let line_cmt   = '-' '-' [^ '\n']* ('\n' | eof)
+
+rule gettoken =
+
+    [' ' '\t' '\n' '\r']+         { return WS }
+  | line_cmt                      { return WS }
+
+  | "SELECT"                      { return SELECT }
+  | "FROM"                        { return FROM }
+  | "WHERE"                       { return WHERE }
+  | "JOIN"                        { return JOIN }
+  | "ON"                          { return ON }
+  | "GROUP"                       { return GROUP }
+  | "ORDER"                       { return ORDER }
+  | "BY"                          { return BY }
+  | "ASC"                         { return ASC }
+  | "DESC"                        { return DESC }
+  | "AS"                          { return AS }
+  | "DISTINCT"                    { return DISTINCT }
+  | "AND"                         { return AND }
+  | "OR"                          { return OR }
+  | "NOT"                         { return NOT }
+
+  | number                        { return NUMBER }
+  | string_lit                    { return STRING }
+  | ident                         { return IDENT }
+
+  | "<>"                          { return NEQ }
+  | "<="                          { return LEQ }
+  | ">="                          { return GEQ }
+  | '='                           { return EQ }
+  | '<'                           { return LT }
+  | '>'                           { return GT }
+
+  | '+'                           { return PLUS }
+  | '-'                           { return MINUS }
+  | '*'                           { return STAR }
+  | '/'                           { return DIV }
+
+  | ','                           { return COMMA }
+  | '.'                           { return DOT }
+  | '('                           { return LPAREN }
+  | ')'                           { return RPAREN }
+
+  | eof                           { raise( 'End of input' ) }
