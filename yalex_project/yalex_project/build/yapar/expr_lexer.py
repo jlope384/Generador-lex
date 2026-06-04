@@ -15,7 +15,7 @@ globals().setdefault('OR', 'OR')
 globals().setdefault('RBRACKET', 'RBRACKET')
 globals().setdefault('SENTENCE', 'SENTENCE')
 
-DFA_TRANSITIONS = {0: {'\r': 8, '&': 10, ']': 13, '\t': 8, '[': 12, '\n': 8, '|': 11, 's': 3, ' ': 8}, 1: {'t': 4}, 2: {'n': 1}, 3: {'e': 2}, 4: {'e': 5}, 5: {'n': 6}, 6: {'c': 7}, 7: {'e': 9}, 8: {'\r': 8, '\t': 8, '\n': 8, ' ': 8}, 9: {}, 10: {}, 11: {}, 12: {}, 13: {}}
+DFA_TRANSITIONS = {0: {'&': 10, 's': 2, '\r': 8, '\n': 8, ']': 13, ' ': 8, '|': 11, '[': 12, '\t': 8}, 1: {'t': 4}, 2: {'e': 3}, 3: {'n': 1}, 4: {'e': 5}, 5: {'n': 6}, 6: {'c': 7}, 7: {'e': 9}, 8: {'\r': 8, '\n': 8, ' ': 8, '\t': 8}, 9: {}, 10: {}, 11: {}, 12: {}, 13: {}}
 DFA_ACCEPTS = {8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5}
 DFA_METHOD = 'direct'
 ACTIONS = [{'kind': 'skip', 'token_name': None, 'raw': 'return lexbuf', 'argument': None}, {'kind': 'return_name', 'token_name': 'SENTENCE', 'raw': 'return SENTENCE', 'argument': None}, {'kind': 'return_name', 'token_name': 'AND', 'raw': 'return AND', 'argument': None}, {'kind': 'return_name', 'token_name': 'OR', 'raw': 'return OR', 'argument': None}, {'kind': 'return_name', 'token_name': 'LBRACKET', 'raw': 'return LBRACKET', 'argument': None}, {'kind': 'return_name', 'token_name': 'RBRACKET', 'raw': 'return RBRACKET', 'argument': None}]
